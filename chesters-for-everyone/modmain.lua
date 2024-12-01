@@ -1,6 +1,6 @@
 -- Import Declarations
 local require = GLOBAL.require
-local json = require "libs/json"
+local json = require "json"
 
 -- Constants Declarations
 local EYEBONE_DATA_FILE = "data/eyebone_data.lua"

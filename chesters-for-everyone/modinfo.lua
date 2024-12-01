@@ -1,5 +1,11 @@
 name = "Chesters for Everyone"
-description = "Spawns a personal Eye Bone (Chester) next to players when they join."
+description = [[
+v0.1.0
+
+When a player joins the server, a personal Eye Bone will spawn next to them -- giving the player their very own Chester!
+
+The original Chester will still be in the world and won't be tied to the player.
+]]
 author = "Athena (devthena)"
 version = "0.1.0"
 api_version = 10

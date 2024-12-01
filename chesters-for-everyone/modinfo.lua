@@ -9,5 +9,7 @@ The original Chester will still be in the world and won't be tied to the player.
 author = "Athena (devthena)"
 version = "0.1.2"
 api_version = 10
+icon_atlas = "modicon.xml"
+icon = "modicon.tex"
 dst_compatible = true
 server_only = true

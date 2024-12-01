@@ -1,11 +1,9 @@
 -- Import Declarations
-local require = GLOBAL.require
-local json = require "libs.json"
+local json = require "json"
 
 -- Constants Declarations
-local DATA_DIR = "data"
-local EYEBONE_DATA_FILE = DATA_DIR .. "/eyebone_data.lua"
-local PLAYER_DATA_FILE = DATA_DIR .. "/player_data.lua"
+local EYEBONE_DATA_FILE = "mods/chesters-for-everyone/data/eyebone_data.lua"
+local PLAYER_DATA_FILE = "mods/chesters-for-everyone/data/player_data.lua"
 local SAVE_INTERVAL = 600 -- 10 minutes
 
 -- Variable Declarations
@@ -14,8 +12,8 @@ local eyebone_data = {}
 
 -- Creates a data directory if it does not exist
 local function CreateSaveDirectory()
-  if not TheSim:GetFilePath(DATA_DIR) then
-    TheSim:CreateDirectory(DATA_DIR)
+  if not GLOBAL.TheSim:GetFilePath("data") then
+    GLOBAL.TheSim:CreateDirectory("data")
   end
 end
 
@@ -121,7 +119,7 @@ end
 local function OnPlayerJoin(player)
   local eyebone_state = eyebone_data[player.userid]
 
-  if player_eyebone then
+  if eyebone_state then
     SpawnEyeBone(player, eyebone_state);
     return
   end

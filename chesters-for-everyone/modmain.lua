@@ -1,52 +1,29 @@
--- Import Declarations
-local require = GLOBAL.require
-local json = require "json"
-
 -- Constants Declarations
-local EYEBONE_DATA_FILE = "data/eyebone_data.lua"
-local PLAYER_DATA_FILE = "data/player_data.lua"
+local EYEBONE_DATA_FILE = "data/eyebone_data.json"
+local PLAYER_DATA_FILE = "data/player_data.json"
 local SAVE_INTERVAL = 600 -- 10 minutes
 
 -- Variable Declarations
 local player_data = {}
 local eyebone_data = {}
 
--- Creates a data directory if it does not exist
-local function CreateSaveDirectory()
-  if not GLOBAL.TheSim:GetFilePath("data") then
-    GLOBAL.TheSim:CreateDirectory("data")
-  end
-end
-
 -- Saves player data
 local function SavePlayerData()
-  local file = io.open(PLAYER_DATA_FILE, "w")
-
-  if file then
-    local json_data = json.encode(player_data)
-    file:write(json_data)
-    file:close()
-  end
+  GLOBAL.TheSim:SetPersistentString(PLAYER_DATA_FILE, GLOBAL.json.encode(player_data))
 end
 
 -- Saves eyebone data
 local function SaveEyeBoneData()
-  local file = io.open(EYEBONE_DATA_FILE, "w")
-
-  if file then
-    for player_id, eyebone in pairs(player_data) do
-      local chester = eyebone.chester
-       eyebone_data[player_id] = {
-        eyebone_location = eyebone:GetPosition(),
-        chester_location = chester:GetPosition(),
-        chester_inventory = chester.components.inventory:GetItems(),
-      }
+  for player_id, eyebone in pairs(player_data) do
+    local chester = eyebone.chester
+      eyebone_data[player_id] = {
+      eyebone_location = eyebone:GetPosition(),
+      chester_location = chester:GetPosition(),
+      chester_inventory = chester.components.inventory:GetItems(),
+    }
     end
 
-    local json_data = json.encode(eyebone_data)
-    file:write(json_data)
-    file:close()
-  end
+    GLOBAL.TheSim:SetPersistentString(EYEBONE_DATA_FILE, GLOBAL.json.encode(eyebone_data))
 end
 
 -- Saves eyebone data periodically
@@ -56,22 +33,20 @@ end
 
 -- Loads player data
 local function LoadPlayerData()
-  local file = io.open(PLAYER_DATA_FILE, "r")
-  if file then
-    local json_data = file:read("*a")
-    player_data = json.decode(json_data)
-    file:close()
-  end
+  GLOBAL.TheSim:GetPersistentString(PLAYER_DATA_FILE, function(success, data)
+    if success == true and data ~= nil then
+      player_data = GLOBAL.json.decode(data)
+    end
+  end)
 end
 
 -- Loads eyebone data
 local function LoadEyeBoneData()
-  local file = io.open(EYEBONE_DATA_FILE, "r")
-  if file then
-    local json_data = file:read("*a")
-    eyebone_data = json.decode(json_data)
-    file:close()
-  end
+  GLOBAL.TheSim:GetPersistentString(EYEBONE_DATA_FILE, function(success, data)
+    if success == true and data ~= nil then
+      eyebone_data = GLOBAL.json.decode(data)
+    end
+  end)
 end
 
 -- Spawns an Eye Bone for existing players
@@ -128,7 +103,6 @@ local function OnPlayerJoin(player)
   SpawnNewEyeBone(player)
 end
 
-CreateSaveDirectory()
 LoadPlayerData()
 LoadEyeBoneData()
 

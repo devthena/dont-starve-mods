@@ -1,9 +1,10 @@
 -- Import Declarations
-local json = GLOBAL.require("mods/chesters-for-everyone/libs/json")
+local require = GLOBAL.require
+local json = require "libs/json"
 
 -- Constants Declarations
-local EYEBONE_DATA_FILE = "mods/chesters-for-everyone/data/eyebone_data.lua"
-local PLAYER_DATA_FILE = "mods/chesters-for-everyone/data/player_data.lua"
+local EYEBONE_DATA_FILE = "data/eyebone_data.lua"
+local PLAYER_DATA_FILE = "data/player_data.lua"
 local SAVE_INTERVAL = 600 -- 10 minutes
 
 -- Variable Declarations

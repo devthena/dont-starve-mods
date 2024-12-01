@@ -1,5 +1,5 @@
 -- Import Declarations
-local json = require "json"
+local json = GLOBAL.require("mods/chesters-for-everyone/libs/json")
 
 -- Constants Declarations
 local EYEBONE_DATA_FILE = "mods/chesters-for-everyone/data/eyebone_data.lua"
@@ -76,7 +76,7 @@ end
 -- Spawns an Eye Bone for existing players
 local function SpawnEyeBone(player, eyebone_state)
   local player_name = player:GetDisplayName()
-  local eyebone = TheWorld:SpawnPrefab("eyebone")
+  local eyebone = GLOBAL.TheWorld:SpawnPrefab("eyebone")
 
   local eyebone_pos = eyebone_state.eyebone_location
   local chester_pos = eyebone_state.chester_location
@@ -100,7 +100,7 @@ end
 -- Spawns an Eye Bone for new players
 local function SpawnNewEyeBone(player)
   local player_name = player:GetDisplayName()
-  local eyebone = TheWorld:SpawnPrefab("eyebone")
+  local eyebone = GLOBAL.TheWorld:SpawnPrefab("eyebone")
   local x, y, z = player.Transform:GetWorldPosition()
 
   eyebone.Transform:SetPosition(x + 2, y, z)
@@ -111,7 +111,7 @@ local function SpawnNewEyeBone(player)
 end
 
 -- Handler for Player Disconnect event
-local function OnPlayerDisconnect(player)
+local function OnPlayerDisconnect()
   SaveEyeBoneData()
 end
 
@@ -132,10 +132,19 @@ LoadPlayerData()
 LoadEyeBoneData()
 
 -- Listens for join and disconnect events
-AddPlayerPostInit(function(player)
-  player:ListenForEvent("on_disconnect", OnPlayerDisconnect)
-  player:ListenForEvent("on_join", OnPlayerJoin)
+GLOBAL.TheWorld:ListenForEvent("ms_playerjoined", function(_, data)
+  local player = GLOBAL.TheWorld.net.components.playerlist:GetPlayerByUserID(data.userid)
+  if player then
+      OnPlayerJoin(player)
+  end
+end)
+
+GLOBAL.TheWorld:ListenForEvent("ms_playerleft", function(_, data)
+  local player = GLOBAL.TheWorld.net.components.playerlist:GetPlayerByUserID(data.userid)
+  if player then
+      OnPlayerDisconnect()
+  end
 end)
 
 -- Starts a periodic save of eyebone data
-TheWorld:DoTaskInTime(SAVE_INTERVAL, PeriodicSave)
+GLOBAL.TheWorld:DoTaskInTime(SAVE_INTERVAL, PeriodicSave)

@@ -106,20 +106,17 @@ end
 LoadPlayerData()
 LoadEyeBoneData()
 
--- Listens for join and disconnect events
-GLOBAL.TheWorld:ListenForEvent("ms_playerjoined", function(_, data)
-  local player = GLOBAL.TheWorld.net.components.playerlist:GetPlayerByUserID(data.userid)
-  if player then
-      OnPlayerJoin(player)
-  end
-end)
+AddPrefabPostInit("world", function(inst)
+  -- Listens for player join events
+  inst:ListenForEvent("ms_playerjoined", function(_, data)
+    if data then
+        OnPlayerJoin(data)
+    end
+  end)
 
-GLOBAL.TheWorld:ListenForEvent("ms_playerleft", function(_, data)
-  local player = GLOBAL.TheWorld.net.components.playerlist:GetPlayerByUserID(data.userid)
-  if player then
-      OnPlayerDisconnect()
-  end
-end)
+  -- Listens for player disconnect events
+  inst:ListenForEvent("ms_playerleft", OnPlayerDisconnect)
 
--- Starts a periodic save of eyebone data
-GLOBAL.TheWorld:DoTaskInTime(SAVE_INTERVAL, PeriodicSave)
+  -- Starts a periodic save of eyebone data
+  inst:DoTaskInTime(SAVE_INTERVAL, PeriodicSave)
+end)

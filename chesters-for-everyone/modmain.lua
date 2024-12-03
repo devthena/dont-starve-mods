@@ -22,6 +22,10 @@ local function SpawnEyeBone(player)
 end
 
 local function OnPlayerJoin(player)
+  if GLOBAL.TheWorld:HasTag("cave") then
+    return
+  end
+
   local player_data = save_data[player.userid]
 
   if not player_data then
@@ -41,7 +45,7 @@ AddSimPostInit(function()
       GLOBAL.TheSim:SetPersistentString(SAVE_DATA_FILE, GLOBAL.json.encode(save_data))
     end)
 
-    GLOBAL.TheWorld:ListenForEvent("ms_playerdisconnected", function ()
+    GLOBAL.TheWorld:ListenForEvent("ms_playerleft", function ()
       GLOBAL.TheSim:SetPersistentString(SAVE_DATA_FILE, GLOBAL.json.encode(save_data))
     end)
 

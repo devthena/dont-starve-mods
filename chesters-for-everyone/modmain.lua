@@ -1,8 +1,5 @@
 PrefabFiles = { "cfe_eyebone", "cfe_chester" }
 
-local SAVE_DATA_FILE = "cfe_save_data.json"
-local save_data = {}
-
 local function SpawnEyeBone(player)
   local player_name = player:GetDisplayName()
   local x, y, z = player.Transform:GetWorldPosition()
@@ -17,8 +14,6 @@ local function SpawnEyeBone(player)
   eyebone.components.named:SetName(player_name .. "'s Eye Bone")
 
   eyebone.Transform:SetPosition(x + 3, y, z)
-
-  save_data[player.userid] = player_name
 end
 
 local function OnPlayerJoin(player)
@@ -26,29 +21,13 @@ local function OnPlayerJoin(player)
     return
   end
 
-  local player_data = save_data[player.userid]
-
-  if not player_data then
+  if GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_eyebone") == nil then
     SpawnEyeBone(player)
   end
 end
 
 AddSimPostInit(function()
-  GLOBAL.TheSim:GetPersistentString(SAVE_DATA_FILE, function(success, data)
-    if success == true and data ~= nil then
-      save_data = GLOBAL.json.decode(data)
-    end
-  end)
-
   if GLOBAL.TheWorld ~= nil and GLOBAL.TheWorld.ismastersim then
-    GLOBAL.TheWorld:ListenForEvent("ms_save", function ()
-      GLOBAL.TheSim:SetPersistentString(SAVE_DATA_FILE, GLOBAL.json.encode(save_data))
-    end)
-
-    GLOBAL.TheWorld:ListenForEvent("ms_playerleft", function ()
-      GLOBAL.TheSim:SetPersistentString(SAVE_DATA_FILE, GLOBAL.json.encode(save_data))
-    end)
-
     GLOBAL.TheWorld:ListenForEvent("ms_playerjoined", function(_inst, player)
       if player then
           OnPlayerJoin(player)

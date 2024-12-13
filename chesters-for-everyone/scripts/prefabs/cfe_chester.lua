@@ -670,7 +670,9 @@ local function create_chester()
 		inst:ListenForEvent("chesterstatedirty", OnClientChesterStateDirty)
 
     inst.OnEntityReplicated = function(inst)
-      inst.replica.container:WidgetSetup("chester")
+      if inst.replica.container ~= nil then
+        inst.replica.container:WidgetSetup("chester")
+      end
     end
 
     return inst

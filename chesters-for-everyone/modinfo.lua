@@ -1,13 +1,13 @@
 name = "Chesters for Everyone"
 description = [[
-Alpha v0.4.2
+Beta v0.5.0
 
-When a player joins the server, a personal Eye Bone will spawn next to them -- giving the player their very own Chester!
+This simple mod spawns a personal Eye Bone next to a player upon joining for the first time -- giving them their very own Chester!
 
-The original Chester will still spawn in the world and won't be tied to the player.
+Note: The original Chester will still spawn in the world and won't be tied to any player.
 ]]
 author = "Athena"
-version = "0.4.2"
+version = "0.5.0"
 api_version = 10
 dst_compatible = true
 all_clients_require_mod = true

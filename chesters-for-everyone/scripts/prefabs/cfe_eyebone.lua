@@ -120,13 +120,15 @@ local function SpawnChester(inst)
   if spawn_pt ~= nil then
     local chester = SpawnPrefab("cfe_chester", inst.linked_skinname, inst.skin_id)
 
-    if chester ~= nil then
+    if chester ~= nil and inst.PlayerID ~= nil and inst.PlayerName ~= nil then
       chester.PlayerID = inst.PlayerID
-      chester.PlayerName = inst.PlayerName
+
+      local nickname = inst.PlayerName .. "'s Chester"
+      chester.Nickname = nickname
 
       chester:AddTag(inst.PlayerID .. "_chester")
       chester:AddComponent("named")
-      chester.components.named:SetName(inst.PlayerName .. "'s Chester")
+      chester.components.named:SetName(nickname)
 
       chester.Physics:Teleport(spawn_pt:Get())
       chester:FacePoint(pt:Get())
@@ -231,7 +233,10 @@ local function OnLoad(inst, data)
   end
 
   if data.PlayerName ~= nil then
-    inst:AddComponent("named")
+    if not inst.components.named then
+      inst:AddComponent("named")
+    end
+    
     inst.components.named:SetName(data.PlayerName .. "'s Eye Bone")
     inst.PlayerName = data.PlayerName
   end
@@ -302,8 +307,8 @@ local function fn()
   inst.SetBuild = SetBuild
 
   -- additional custom variables
-  inst.PlayerID = "cfe"
-  inst.PlayerName = "Player"
+  inst.PlayerID = nil
+  inst.PlayerName = nil
 
   return inst
 end

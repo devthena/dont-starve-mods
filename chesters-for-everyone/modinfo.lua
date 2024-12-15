@@ -1,13 +1,16 @@
 name = "Chesters for Everyone"
 description = [[
-Beta v0.5.0
+Version 0.6.0 (BETA)
 
-This simple mod spawns a personal Eye Bone next to a player upon joining for the first time -- giving them their very own Chester!
+This mod spawns a personal Eye Bone for each player, giving them their very own Chester!
 
-Note: The original Chester will still spawn in the world and won't be tied to any player.
+Rename your Chester using:
+/rename_chester <name> OR /rc <name>
+
+Note: This mod does not spawn a Snow or Shadow Chester -- the player is still responsible for its transformation.
 ]]
 author = "Athena"
-version = "0.5.0"
+version = "0.6.0"
 api_version = 10
 dst_compatible = true
 all_clients_require_mod = true

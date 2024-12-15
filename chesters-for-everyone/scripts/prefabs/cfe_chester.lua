@@ -574,7 +574,7 @@ end or nil
 local function OnSave(inst, data)
 	data.ChesterState = ChesterStateNames[inst._chesterstate:value()]
   data.PlayerID = inst.PlayerID
-  data.PlayerName = inst.PlayerName
+  data.Nickname = inst.Nickname
 end
 
 local function OnPreLoad(inst, data)
@@ -591,10 +591,13 @@ local function OnPreLoad(inst, data)
     inst.PlayerID = data.PlayerID
   end
 
-  if data.PlayerName ~= nil then
-    inst:AddComponent("named")
-    inst.components.named:SetName(data.PlayerName .. "'s Chester")
-    inst.PlayerName = data.PlayerName
+  if data.Nickname ~= nil then
+    if not inst.components.named then
+      inst:AddComponent("named")
+    end
+
+    inst.components.named:SetName(data.Nickname)
+    inst.Nickname = data.Nickname
   end
 end
 
@@ -723,8 +726,8 @@ local function create_chester()
   inst.sounds = sounds
 
   -- additional custom variables
-  inst.PlayerID = "cfe"
-  inst.PlayerName = "Player"
+  inst.PlayerID = nil
+  inst.Nickname = nil
 
   inst:SetStateGraph("SGchester")
   inst.sg:GoToState("idle")

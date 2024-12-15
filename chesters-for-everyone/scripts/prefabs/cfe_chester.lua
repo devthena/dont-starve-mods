@@ -1,17 +1,17 @@
 local assets = {
-  Asset("PKGREF", "anim/ui_chester_shadow_3x4.zip"),
-  Asset("ANIM", "anim/ui_portal_shadow_3x4.zip"),
-  Asset("ANIM", "anim/ui_chest_3x3.zip"),
-  Asset("ANIM", "anim/chester.zip"),
-  Asset("ANIM", "anim/chester_build.zip"),
-  Asset("ANIM", "anim/chester_shadow_build.zip"),
-  Asset("ANIM", "anim/chester_snow_build.zip"),
-  Asset("ANIM", "anim/shadow_breath.zip"),
-  Asset("ANIM", "anim/tophat_fx.zip"),
-  Asset("SOUND", "sound/chester.fsb"),
-  Asset("MINIMAP_IMAGE", "chester"),
-  Asset("MINIMAP_IMAGE", "chestershadow"),
-  Asset("MINIMAP_IMAGE", "chestersnow"),
+	Asset("PKGREF", "anim/ui_chester_shadow_3x4.zip"),
+	Asset("ANIM", "anim/ui_portal_shadow_3x4.zip"),
+	Asset("ANIM", "anim/ui_chest_3x3.zip"),
+	Asset("ANIM", "anim/chester.zip"),
+	Asset("ANIM", "anim/chester_build.zip"),
+	Asset("ANIM", "anim/chester_shadow_build.zip"),
+	Asset("ANIM", "anim/chester_snow_build.zip"),
+	Asset("ANIM", "anim/shadow_breath.zip"),
+	Asset("ANIM", "anim/tophat_fx.zip"),
+	Asset("SOUND", "sound/chester.fsb"),
+	Asset("MINIMAP_IMAGE", "chester"),
+	Asset("MINIMAP_IMAGE", "chestershadow"),
+	Asset("MINIMAP_IMAGE", "chestersnow"),
 }
 
 local assets_swirl = {
@@ -20,15 +20,15 @@ local assets_swirl = {
 }
 
 local prefabs = {
-  "cfe_eyebone",
-  "chesterlight",
-  "chester_transform_fx",
-  "globalmapiconunderfog",
+	"cfe_eyebone",
+	"chesterlight",
+	"chester_transform_fx",
+	"globalmapiconunderfog",
 	"frostbreath",
 	"shadow_chester_swirl_fx",
 }
 
-local brain = require "brains/chesterbrain"
+local brain = require("brains/chesterbrain")
 
 local ChesterStateNames = {
 	"NORMAL",
@@ -39,80 +39,105 @@ local ChesterStateNames = {
 local ChesterState = table.invert(ChesterStateNames)
 
 local sounds = {
-  hurt = "dontstarve/creatures/chester/hurt",
-  pant = "dontstarve/creatures/chester/pant",
-  death = "dontstarve/creatures/chester/death",
-  open = "dontstarve/creatures/chester/open",
-  close = "dontstarve/creatures/chester/close",
-  pop = "dontstarve/creatures/chester/pop",
-  boing = "dontstarve/creatures/chester/boing",
-  lick = "dontstarve/creatures/chester/lick",
+	hurt = "dontstarve/creatures/chester/hurt",
+	pant = "dontstarve/creatures/chester/pant",
+	death = "dontstarve/creatures/chester/death",
+	open = "dontstarve/creatures/chester/open",
+	close = "dontstarve/creatures/chester/close",
+	pop = "dontstarve/creatures/chester/pop",
+	boing = "dontstarve/creatures/chester/boing",
+	lick = "dontstarve/creatures/chester/lick",
 }
 
 local WAKE_TO_FOLLOW_DISTANCE = 14
 local SLEEP_NEAR_LEADER_DISTANCE = 7
 
 local function ShouldWakeUp(inst)
-  return DefaultWakeTest(inst) or not inst.components.follower:IsNearLeader(WAKE_TO_FOLLOW_DISTANCE)
+	return DefaultWakeTest(inst) or not inst.components.follower:IsNearLeader(WAKE_TO_FOLLOW_DISTANCE)
 end
 
 local function ShouldSleep(inst)
-  return DefaultSleepTest(inst) and not inst.sg:HasStateTag("open") and inst.components.follower:IsNearLeader(SLEEP_NEAR_LEADER_DISTANCE) and not TheWorld.state.isfullmoon
+	return DefaultSleepTest(inst)
+		and not inst.sg:HasStateTag("open")
+		and inst.components.follower:IsNearLeader(SLEEP_NEAR_LEADER_DISTANCE)
+		and not TheWorld.state.isfullmoon
 end
 
 local function ShouldKeepTarget()
-  return false
+	return false
 end
 
 local function OnOpen(inst)
-  if not inst.components.health:IsDead() then
-    inst.sg:GoToState("open")
-  end
+	if not inst.components.health:IsDead() then
+		inst.sg:GoToState("open")
+	end
 end
 
 local function OnClose(inst)
-  if not inst.components.health:IsDead() and inst.sg.currentstate.name ~= "transition" then
-	
-    inst.sg.statemem.closing = true
-    inst.sg:GoToState("close")
-  end
+	if not inst.components.health:IsDead() and inst.sg.currentstate.name ~= "transition" then
+		inst.sg.statemem.closing = true
+		inst.sg:GoToState("close")
+	end
 end
 
 local function OnStopFollowing(inst)
-  inst:RemoveTag("companion")
+	inst:RemoveTag("companion")
 end
 
 local function OnStartFollowing(inst)
-  inst:AddTag("companion")
+	inst:AddTag("companion")
 end
 
 local function SetBuild(inst)
-  local skin_build = inst:GetSkinBuild()
+	local skin_build = inst:GetSkinBuild()
 	local chester_state = inst._chesterstate:value()
 
-  if skin_build ~= nil then
-		local state =
-			(chester_state == ChesterState.SHADOW and "_shadow") or
-			(chester_state == ChesterState.SNOW and "_snow") or
-			""
+	if skin_build ~= nil then
+		local state = (chester_state == ChesterState.SHADOW and "_shadow")
+			or (chester_state == ChesterState.SNOW and "_snow")
+			or ""
 
-    inst.AnimState:OverrideItemSkinSymbol("chester_body", skin_build, "chester_body" .. state, inst.GUID, "chester_build")
-    inst.AnimState:OverrideItemSkinSymbol("chester_foot", skin_build, "chester_foot" .. state, inst.GUID, "chester_build")
-    inst.AnimState:OverrideItemSkinSymbol("chester_lid", skin_build, "chester_lid" .. state, inst.GUID, "chester_build")
-    inst.AnimState:OverrideItemSkinSymbol("chester_tongue", skin_build, "chester_tongue" .. state, inst.GUID, "chester_build")
-  else
-    inst.AnimState:ClearAllOverrideSymbols()
-
-		inst.AnimState:SetBuild(
-			(chester_state == ChesterState.SHADOW and "chester_shadow_build") or
-			(chester_state == ChesterState.SNOW and "chester_snow_build") or
+		inst.AnimState:OverrideItemSkinSymbol(
+			"chester_body",
+			skin_build,
+			"chester_body" .. state,
+			inst.GUID,
 			"chester_build"
 		)
-  end
+		inst.AnimState:OverrideItemSkinSymbol(
+			"chester_foot",
+			skin_build,
+			"chester_foot" .. state,
+			inst.GUID,
+			"chester_build"
+		)
+		inst.AnimState:OverrideItemSkinSymbol(
+			"chester_lid",
+			skin_build,
+			"chester_lid" .. state,
+			inst.GUID,
+			"chester_build"
+		)
+		inst.AnimState:OverrideItemSkinSymbol(
+			"chester_tongue",
+			skin_build,
+			"chester_tongue" .. state,
+			inst.GUID,
+			"chester_build"
+		)
+	else
+		inst.AnimState:ClearAllOverrideSymbols()
+
+		inst.AnimState:SetBuild(
+			(chester_state == ChesterState.SHADOW and "chester_shadow_build")
+				or (chester_state == ChesterState.SNOW and "chester_snow_build")
+				or "chester_build"
+		)
+	end
 
 	if chester_state == ChesterState.SHADOW then
 		inst.AnimState:AddOverrideBuild("tophat_fx")
-		inst.AnimState:SetSymbolMultColour("fx_float", 1, 1, 1, .5)
+		inst.AnimState:SetSymbolMultColour("fx_float", 1, 1, 1, 0.5)
 	else
 		inst.AnimState:ClearOverrideBuild("tophat_fx")
 		inst.AnimState:SetSymbolMultColour("fx_float", 1, 1, 1, 1)
@@ -186,10 +211,9 @@ end
 
 local function DoFrostBreath(inst)
 	local frostbreath = inst.frostbreath
-	local delay =
-		(inst.AnimState:IsCurrentAnimation("idle_loop") and math.random() + 2) or
-		(inst.AnimState:IsCurrentAnimation("idle_loop_open") and math.random() * .5 + .25) or
-		0
+	local delay = (inst.AnimState:IsCurrentAnimation("idle_loop") and math.random() + 2)
+		or (inst.AnimState:IsCurrentAnimation("idle_loop_open") and math.random() * 0.5 + 0.25)
+		or 0
 
 	if delay > 0 then
 		local t = GetTime()
@@ -244,8 +268,8 @@ local function EnableFrostBreath(inst, enable)
 				inst.frostbreath.fx2.entity:SetParent(inst.entity)
 				inst.frostbreath.fx2.entity:AddFollower()
 				inst.frostbreath.fx2.Follower:FollowSymbol(inst.GUID, "breath_right", 0, 0, 0)
-				
-        if TheWorld.ismastersim then
+
+				if TheWorld.ismastersim then
 					inst:ListenForEvent("animover", TriggerAndDoFrostBreath)
 				else
 					inst:ListenForEvent("chester._frostbreathtrigger", DoFrostBreath)
@@ -302,15 +326,15 @@ local function CreateShadowBreath(pool)
 
 		inst.AnimState:SetBank("shadow_breath")
 		inst.AnimState:SetBuild("shadow_breath")
-		inst.AnimState:SetMultColour(1, 1, 1, .5)
+		inst.AnimState:SetMultColour(1, 1, 1, 0.5)
 
 		inst.pool = pool
 		inst:ListenForEvent("animover", OnShadowBreathAnimOver)
 	end
 
-	inst.AnimState:PlayAnimation("idle"..tostring(math.random(3)))
+	inst.AnimState:PlayAnimation("idle" .. tostring(math.random(3)))
 
-	if math.random() < .5 then
+	if math.random() < 0.5 then
 		inst.AnimState:SetScale(-1, 1)
 	end
 
@@ -337,10 +361,9 @@ local function EmitShadow(inst, isleft, taskname)
 
 	local health = inst.replica.health
 
-	inst.shadowbreath[taskname] =
-		not (health ~= nil and health:IsDead()) and
-		inst:DoTaskInTime(.35 + math.random() * .6, EmitShadow, isleft, taskname) or
-		nil
+	inst.shadowbreath[taskname] = not (health ~= nil and health:IsDead())
+			and inst:DoTaskInTime(0.35 + math.random() * 0.6, EmitShadow, isleft, taskname)
+		or nil
 end
 
 local function EnableShadowBreath(inst, enable)
@@ -348,8 +371,8 @@ local function EnableShadowBreath(inst, enable)
 		if inst.shadowbreath == nil and not TheNet:IsDedicated() then
 			inst.shadowbreath = {
 				pool = {},
-				task = inst:DoTaskInTime(math.random() * .6, EmitShadow, true, "task"),
-				task2 = inst:DoTaskInTime(math.random() * .6, EmitShadow, false, "task2"),
+				task = inst:DoTaskInTime(math.random() * 0.6, EmitShadow, true, "task"),
+				task2 = inst:DoTaskInTime(math.random() * 0.6, EmitShadow, false, "task2"),
 			}
 		end
 	elseif inst.shadowbreath ~= nil then
@@ -428,11 +451,11 @@ end
 
 local function MorphShadowChester(inst)
 	inst:RemoveTag("fridge")
-  inst:AddTag("spoiler")
+	inst:AddTag("spoiler")
 	inst:AddTag("shadow_aligned")
 
-  inst.MiniMapEntity:SetIcon("chestershadow.png")
-  inst.components.maprevealable:SetIcon("chestershadow.png")
+	inst.MiniMapEntity:SetIcon("chestershadow.png")
+	inst.components.maprevealable:SetIcon("chestershadow.png")
 
 	if POPULATING then
 		inst.components.container:WidgetSetup("shadowchester")
@@ -440,57 +463,57 @@ local function MorphShadowChester(inst)
 		SwitchToShadowContainerProxy(inst)
 	end
 
-  local leader = inst.components.follower.leader
-  
-  if leader ~= nil then
-    inst.components.follower.leader:MorphShadowEyebone()
-  end
+	local leader = inst.components.follower.leader
+
+	if leader ~= nil then
+		inst.components.follower.leader:MorphShadowEyebone()
+	end
 
 	inst.sg.mem.isshadow = true
 	inst._chesterstate:set(ChesterState.SHADOW)
 
-  SetBuild(inst)
+	SetBuild(inst)
 	ToggleBreath(inst)
 end
 
 local function MorphSnowChester(inst)
 	inst:RemoveTag("spoiler")
 	inst:RemoveTag("shadow_aligned")
-  inst:AddTag("fridge")
+	inst:AddTag("fridge")
 
-  inst.MiniMapEntity:SetIcon("chestersnow.png")
-  inst.components.maprevealable:SetIcon("chestersnow.png")
+	inst.MiniMapEntity:SetIcon("chestersnow.png")
+	inst.components.maprevealable:SetIcon("chestersnow.png")
 
 	SwitchToContainer(inst)
 
-  local leader = inst.components.follower.leader
-  
-  if leader ~= nil then
-    inst.components.follower.leader:MorphSnowEyebone()
-  end
+	local leader = inst.components.follower.leader
+
+	if leader ~= nil then
+		inst.components.follower.leader:MorphSnowEyebone()
+	end
 
 	inst.sg.mem.isshadow = nil
 	inst._chesterstate:set(ChesterState.SNOW)
-  
-  SetBuild(inst)
+
+	SetBuild(inst)
 	ToggleBreath(inst)
 end
 
 local function MorphNormalChester(inst)
-  inst:RemoveTag("fridge")
-  inst:RemoveTag("spoiler")
+	inst:RemoveTag("fridge")
+	inst:RemoveTag("spoiler")
 	inst:RemoveTag("shadow_aligned")
 
-  inst.MiniMapEntity:SetIcon("chester.png")
-  inst.components.maprevealable:SetIcon("chester.png")
+	inst.MiniMapEntity:SetIcon("chester.png")
+	inst.components.maprevealable:SetIcon("chester.png")
 
 	SwitchToContainer(inst)
 
-  local leader = inst.components.follower.leader
-  
-  if leader ~= nil then
-    inst.components.follower.leader:MorphNormalEyebone()
-  end
+	local leader = inst.components.follower.leader
+
+	if leader ~= nil then
+		inst.components.follower.leader:MorphNormalEyebone()
+	end
 
 	inst.sg.mem.isshadow = nil
 	inst._chesterstate:set(ChesterState.NORMAL)
@@ -500,105 +523,108 @@ local function MorphNormalChester(inst)
 end
 
 local function CanMorph(inst)
-  if inst._chesterstate:value() ~= ChesterState.NORMAL or not TheWorld.state.isfullmoon then
-    return false, false
-  end
+	if inst._chesterstate:value() ~= ChesterState.NORMAL or not TheWorld.state.isfullmoon then
+		return false, false
+	end
 
-  local container = inst.components.container
-  
-  if container == nil or container:IsOpen() then
-    return false, false
-  end
+	local container = inst.components.container
 
-  local canShadow = true
-  local canSnow = true
+	if container == nil or container:IsOpen() then
+		return false, false
+	end
 
-  for i = 1, container:GetNumSlots() do
-    local item = container:GetItemInSlot(i)
-    
-    if item == nil then
-      return false, false
-    end
+	local canShadow = true
+	local canSnow = true
 
-    canShadow = canShadow and item.prefab == "nightmarefuel"
-    canSnow = canSnow and item.prefab == "bluegem"
+	for i = 1, container:GetNumSlots() do
+		local item = container:GetItemInSlot(i)
 
-    if not (canShadow or canSnow) then
-      return false, false
-    end
-  end
+		if item == nil then
+			return false, false
+		end
 
-  return canShadow, canSnow
+		canShadow = canShadow and item.prefab == "nightmarefuel"
+		canSnow = canSnow and item.prefab == "bluegem"
+
+		if not (canShadow or canSnow) then
+			return false, false
+		end
+	end
+
+	return canShadow, canSnow
 end
 
 local function CheckForMorph(inst)
-  local canShadow, canSnow = CanMorph(inst)
-  
-  if canShadow or canSnow then
-    inst.sg:GoToState("transition")
-  end
+	local canShadow, canSnow = CanMorph(inst)
+
+	if canShadow or canSnow then
+		inst.sg:GoToState("transition")
+	end
 end
 
 local function DoMorph(inst, fn)
-  inst.MorphChester = nil
-  inst:StopWatchingWorldState("isfullmoon", CheckForMorph)
-  inst:RemoveEventCallback("onclose", CheckForMorph)
-  fn(inst)
+	inst.MorphChester = nil
+	inst:StopWatchingWorldState("isfullmoon", CheckForMorph)
+	inst:RemoveEventCallback("onclose", CheckForMorph)
+	fn(inst)
 end
 
 local function MorphChester(inst)
-  local canShadow, canSnow = CanMorph(inst)
-  if not (canShadow or canSnow) then
-    return
-  end
+	local canShadow, canSnow = CanMorph(inst)
+	if not (canShadow or canSnow) then
+		return
+	end
 
-  local container = inst.components.container
+	local container = inst.components.container
 
-  for i = 1, container:GetNumSlots() do
-    container:RemoveItem(container:GetItemInSlot(i)):Remove()
-  end
+	for i = 1, container:GetNumSlots() do
+		container:RemoveItem(container:GetItemInSlot(i)):Remove()
+	end
 
-  DoMorph(inst, canShadow and MorphShadowChester or MorphSnowChester)
+	DoMorph(inst, canShadow and MorphShadowChester or MorphSnowChester)
 end
 
-local DebugMorph = BRANCH == "dev" and function(inst, state)
-	state = state ~= nil and string.upper(state) or nil
+local DebugMorph = BRANCH == "dev"
+		and function(inst, state)
+			state = state ~= nil and string.upper(state) or nil
 
-	DoMorph(inst,
-		(state == "SHADOW" and MorphShadowChester) or
-		(state == "SNOW" and MorphSnowChester) or
-		MorphNormalChester
-	)
-end or nil
+			DoMorph(
+				inst,
+				(state == "SHADOW" and MorphShadowChester)
+					or (state == "SNOW" and MorphSnowChester)
+					or MorphNormalChester
+			)
+		end
+	or nil
 
 local function OnSave(inst, data)
 	data.ChesterState = ChesterStateNames[inst._chesterstate:value()]
-  data.PlayerID = inst.PlayerID
-  data.Nickname = inst.Nickname
+	data.PlayerID = inst.PlayerID
+	data.Nickname = inst.Nickname
 end
 
 local function OnPreLoad(inst, data)
 	local chester_state = data ~= nil and ChesterState[data.ChesterState] or nil
 
 	if chester_state == ChesterState.SHADOW then
-    DoMorph(inst, MorphShadowChester)
+		DoMorph(inst, MorphShadowChester)
 	elseif chester_state == ChesterState.SNOW then
-    DoMorph(inst, MorphSnowChester)
-  end
+		DoMorph(inst, MorphSnowChester)
+	end
 
-  if data.PlayerID ~= nil then
-    inst:AddTag(data.PlayerID .. "_chester")
-    inst.PlayerID = data.PlayerID
-  end
+	if data.PlayerID ~= nil then
+		inst:AddTag(data.PlayerID .. "_chester")
+		inst.PlayerID = data.PlayerID
+	end
 
-  if data.Nickname ~= nil then
-    if not inst.components.named then
-      inst:AddComponent("named")
-    end
+	if data.Nickname ~= nil then
+		if not inst.components.named then
+			inst:AddComponent("named")
+		end
 
-    inst.components.named:SetName(data.Nickname)
-    inst.Nickname = data.Nickname
-  end
+		inst.components.named:SetName(data.Nickname)
+		inst.Nickname = data.Nickname
+	end
 end
 
 local function OnLoadPostPass(inst)
@@ -612,52 +638,52 @@ local function OnClientChesterStateDirty(inst)
 end
 
 local function OnHaunt(inst)
-  if math.random() <= TUNING.HAUNT_CHANCE_ALWAYS then
-    inst.components.hauntable.panic = true
-    inst.components.hauntable.panictimer = TUNING.HAUNT_PANIC_TIME_SMALL
-    inst.components.hauntable.hauntvalue = TUNING.HAUNT_SMALL
-    
-    return true
-  end
-  
-  return false
+	if math.random() <= TUNING.HAUNT_CHANCE_ALWAYS then
+		inst.components.hauntable.panic = true
+		inst.components.hauntable.panictimer = TUNING.HAUNT_PANIC_TIME_SMALL
+		inst.components.hauntable.hauntvalue = TUNING.HAUNT_SMALL
+
+		return true
+	end
+
+	return false
 end
 
 local function create_chester()
-  local inst = CreateEntity()
+	local inst = CreateEntity()
 
-  inst.entity:AddTransform()
-  inst.entity:AddAnimState()
-  inst.entity:AddSoundEmitter()
-  inst.entity:AddDynamicShadow()
-  inst.entity:AddMiniMapEntity()
-  inst.entity:AddNetwork()
+	inst.entity:AddTransform()
+	inst.entity:AddAnimState()
+	inst.entity:AddSoundEmitter()
+	inst.entity:AddDynamicShadow()
+	inst.entity:AddMiniMapEntity()
+	inst.entity:AddNetwork()
 
-  MakeCharacterPhysics(inst, 75, .5)
-  
-  inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
-  inst.Physics:ClearCollisionMask()
-  inst.Physics:CollidesWith(COLLISION.WORLD)
-  inst.Physics:CollidesWith(COLLISION.OBSTACLES)
-  inst.Physics:CollidesWith(COLLISION.CHARACTERS)
+	MakeCharacterPhysics(inst, 75, 0.5)
 
-  inst:AddTag("companion")
-  inst:AddTag("character")
-  inst:AddTag("scarytoprey")
-  inst:AddTag("chester")
-  inst:AddTag("notraptrigger")
-  inst:AddTag("noauradamage")
-  inst:AddTag("devourable")
+	inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
+	inst.Physics:ClearCollisionMask()
+	inst.Physics:CollidesWith(COLLISION.WORLD)
+	inst.Physics:CollidesWith(COLLISION.OBSTACLES)
+	inst.Physics:CollidesWith(COLLISION.CHARACTERS)
 
-  inst.MiniMapEntity:SetIcon("chester.png")
-  inst.MiniMapEntity:SetCanUseCache(false)
+	inst:AddTag("companion")
+	inst:AddTag("character")
+	inst:AddTag("scarytoprey")
+	inst:AddTag("chester")
+	inst:AddTag("notraptrigger")
+	inst:AddTag("noauradamage")
+	inst:AddTag("devourable")
 
-  inst.AnimState:SetBank("chester")
-  inst.AnimState:SetBuild("chester_build")
+	inst.MiniMapEntity:SetIcon("chester.png")
+	inst.MiniMapEntity:SetCanUseCache(false)
 
-  inst.DynamicShadow:SetSize(2, 1.5)
+	inst.AnimState:SetBank("chester")
+	inst.AnimState:SetBuild("chester_build")
 
-  inst.Transform:SetFourFaced()
+	inst.DynamicShadow:SetSize(2, 1.5)
+
+	inst.Transform:SetFourFaced()
 
 	inst._chesterstate = net_tinybyte(inst.GUID, "chester._chesterstate", "chesterstatedirty")
 	inst._chesterstate:set(ChesterState.NORMAL)
@@ -667,84 +693,84 @@ local function create_chester()
 	inst:AddComponent("container_proxy")
 	inst.components.container_proxy:SetCanBeOpened(false)
 
-  inst.entity:SetPristine()
+	inst.entity:SetPristine()
 
-  if not TheWorld.ismastersim then
+	if not TheWorld.ismastersim then
 		inst:ListenForEvent("chesterstatedirty", OnClientChesterStateDirty)
 
-    inst.OnEntityReplicated = function(inst)
-      if inst.replica.container ~= nil then
-        inst.replica.container:WidgetSetup("chester")
-      end
-    end
+		inst.OnEntityReplicated = function(inst)
+			if inst.replica.container ~= nil then
+				inst.replica.container:WidgetSetup("chester")
+			end
+		end
 
-    return inst
-  end
+		return inst
+	end
 
-  inst:AddComponent("maprevealable")
-  inst.components.maprevealable:SetIconPrefab("globalmapiconunderfog")
+	inst:AddComponent("maprevealable")
+	inst.components.maprevealable:SetIconPrefab("globalmapiconunderfog")
 
-  inst:AddComponent("combat")
-  inst.components.combat.hiteffectsymbol = "chester_body"
-  inst.components.combat:SetKeepTargetFunction(ShouldKeepTarget)
+	inst:AddComponent("combat")
+	inst.components.combat.hiteffectsymbol = "chester_body"
+	inst.components.combat:SetKeepTargetFunction(ShouldKeepTarget)
 
-  inst:AddComponent("health")
-  inst.components.health:SetMaxHealth(TUNING.CHESTER_HEALTH)
-  inst.components.health:StartRegen(TUNING.CHESTER_HEALTH_REGEN_AMOUNT, TUNING.CHESTER_HEALTH_REGEN_PERIOD)
+	inst:AddComponent("health")
+	inst.components.health:SetMaxHealth(TUNING.CHESTER_HEALTH)
+	inst.components.health:StartRegen(TUNING.CHESTER_HEALTH_REGEN_AMOUNT, TUNING.CHESTER_HEALTH_REGEN_PERIOD)
 
-  inst:AddComponent("inspectable")
-  inst.components.inspectable:RecordViews()
+	inst:AddComponent("inspectable")
+	inst.components.inspectable:RecordViews()
 
-  inst:AddComponent("locomotor")
-  inst.components.locomotor.walkspeed = 3
-  inst.components.locomotor.runspeed = 7
-  inst.components.locomotor:SetAllowPlatformHopping(true)
+	inst:AddComponent("locomotor")
+	inst.components.locomotor.walkspeed = 3
+	inst.components.locomotor.runspeed = 7
+	inst.components.locomotor:SetAllowPlatformHopping(true)
 
-  inst:AddComponent("embarker")
-  inst:AddComponent("drownable")
+	inst:AddComponent("embarker")
+	inst:AddComponent("drownable")
 
-  inst:AddComponent("follower")
-  inst:ListenForEvent("stopfollowing", OnStopFollowing)
-  inst:ListenForEvent("startfollowing", OnStartFollowing)
+	inst:AddComponent("follower")
+	inst:ListenForEvent("stopfollowing", OnStopFollowing)
+	inst:ListenForEvent("startfollowing", OnStartFollowing)
 
-  inst:AddComponent("knownlocations")
+	inst:AddComponent("knownlocations")
 
-  MakeSmallBurnableCharacter(inst, "chester_body")
+	MakeSmallBurnableCharacter(inst, "chester_body")
 
-  inst:AddComponent("sleeper")
-  inst.components.sleeper.watchlight = true
-  inst.components.sleeper:SetResistance(3)
-  inst.components.sleeper.testperiod = GetRandomWithVariance(6, 2)
-  inst.components.sleeper:SetSleepTest(ShouldSleep)
-  inst.components.sleeper:SetWakeTest(ShouldWakeUp)
+	inst:AddComponent("sleeper")
+	inst.components.sleeper.watchlight = true
+	inst.components.sleeper:SetResistance(3)
+	inst.components.sleeper.testperiod = GetRandomWithVariance(6, 2)
+	inst.components.sleeper:SetSleepTest(ShouldSleep)
+	inst.components.sleeper:SetWakeTest(ShouldWakeUp)
 
-  MakeHauntableDropFirstItem(inst)
-  AddHauntableCustomReaction(inst, OnHaunt, false, false, true)
+	MakeHauntableDropFirstItem(inst)
+	AddHauntableCustomReaction(inst, OnHaunt, false, false, true)
 
-  SwitchToContainer(inst)
+	SwitchToContainer(inst)
 
-  inst.sounds = sounds
+	inst.sounds = sounds
 
-  -- additional custom variables
-  inst.PlayerID = nil
-  inst.Nickname = nil
+	-- additional custom variables
+	inst.PlayerID = nil
+	inst.Nickname = nil
 
-  inst:SetStateGraph("SGchester")
-  inst.sg:GoToState("idle")
+	inst:SetStateGraph("SGchester")
+	inst.sg:GoToState("idle")
 
-  inst:SetBrain(brain)
+	inst:SetBrain(brain)
 
 	inst.DebugMorph = DebugMorph
-  inst.MorphChester = MorphChester
-  inst:WatchWorldState("isfullmoon", CheckForMorph)
-  inst:ListenForEvent("onclose", CheckForMorph)
+	inst.MorphChester = MorphChester
+	inst:WatchWorldState("isfullmoon", CheckForMorph)
+	inst:ListenForEvent("onclose", CheckForMorph)
 
-  inst.OnSave = OnSave
-  inst.OnPreLoad = OnPreLoad
+	inst.OnSave = OnSave
+	inst.OnPreLoad = OnPreLoad
 	inst.OnLoadPostPass = OnLoadPostPass
-  inst.SetBuild = SetBuild
+	inst.SetBuild = SetBuild
 
-  return inst
+	return inst
 end
 
 local function ReleaseSwirl(inst)
@@ -793,5 +819,4 @@ end
 
 --------------------------------------------------------------------------
 
-return Prefab("cfe_chester", create_chester, assets, prefabs),
-	Prefab("shadow_chester_swirl_fx", swirl_fn, assets_swirl)
+return Prefab("cfe_chester", create_chester, assets, prefabs), Prefab("shadow_chester_swirl_fx", swirl_fn, assets_swirl)

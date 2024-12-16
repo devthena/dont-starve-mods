@@ -1,5 +1,7 @@
 PrefabFiles = { "cfe_eyebone", "cfe_chester" }
 
+local chester_access = GetModConfigData("chester_access")
+
 local function SpawnEyeBone(player)
 	local player_name = player:GetDisplayName()
 	local x, y, z = player.Transform:GetWorldPosition()
@@ -26,6 +28,28 @@ local function OnPlayerJoin(player)
 	end
 end
 
+local function OnContainerOpen(self)
+	local original_open = self.Open
+	if not original_open then
+		return
+	end
+
+	function self:Open(doer)
+		if chester_access == "private" and self.inst.PlayerID ~= doer.userid then
+			doer.components.talker:Say("Hm, this isn't my Chester.")
+			return
+		end
+
+		original_open(self, doer)
+	end
+end
+
+AddPrefabPostInit("cfe_chester", function(inst)
+	if inst.components.container then
+		OnContainerOpen(inst.components.container)
+	end
+end)
+
 AddSimPostInit(function()
 	if GLOBAL.TheWorld ~= nil and GLOBAL.TheWorld.ismastersim then
 		GLOBAL.TheWorld:ListenForEvent("ms_playerjoined", function(_inst, player)
@@ -48,7 +72,7 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	end
 
 	if name:lower() == "chester" then
-		player.components.talker:Say("Hm, better think of another name.")
+		player.components.talker:Say("Hm, maybe another name.")
 		return
 	end
 

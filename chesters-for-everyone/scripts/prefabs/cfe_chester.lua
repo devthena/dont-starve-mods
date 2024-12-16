@@ -52,6 +52,8 @@ local sounds = {
 local WAKE_TO_FOLLOW_DISTANCE = 14
 local SLEEP_NEAR_LEADER_DISTANCE = 7
 
+local chester_access = GetModConfigData("chester_access", "chesters-for-everyone")
+
 local function ShouldWakeUp(inst)
 	return DefaultWakeTest(inst) or not inst.components.follower:IsNearLeader(WAKE_TO_FOLLOW_DISTANCE)
 end
@@ -67,8 +69,12 @@ local function ShouldKeepTarget()
 	return false
 end
 
-local function OnOpen(inst)
-	if not inst.components.health:IsDead() then
+local function OnOpen(inst, player)
+	if inst.components.health:IsDead() then
+		return
+	end
+
+	if chester_access == "public" or inst.PlayerID == player.doer.userid then
 		inst.sg:GoToState("open")
 	end
 end
@@ -670,7 +676,6 @@ local function create_chester()
 	inst:AddTag("companion")
 	inst:AddTag("character")
 	inst:AddTag("scarytoprey")
-	inst:AddTag("chester")
 	inst:AddTag("notraptrigger")
 	inst:AddTag("noauradamage")
 	inst:AddTag("devourable")

@@ -1,5 +1,10 @@
 PrefabFiles = { "cfe_eyebone", "cfe_chester" }
 
+local prompts_missing = require("prompts/missing_chester")
+local prompts_private = require("prompts/private_chester")
+local prompts_taken = require("prompts/name_taken")
+local prompts_rename = require("prompts/rename_chester")
+
 local chester_access = GetModConfigData("chester_access")
 
 local function SpawnEyeBone(player)
@@ -36,7 +41,8 @@ local function OnContainerOpen(self)
 
 	function self:Open(doer)
 		if chester_access == "private" and self.inst.PlayerID ~= doer.userid then
-			doer.components.talker:Say("Hm, this isn't my Chester.")
+			local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Chester."
+			doer.components.talker:Say(locked_message)
 			return
 		end
 
@@ -72,14 +78,16 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	end
 
 	if name:lower() == "chester" then
-		player.components.talker:Say("Hm, maybe another name.")
+		local basic_name_message = prompts_taken[player.prefab] or "Hm, maybe another name."
+		player.components.talker:Say(basic_name_message)
 		return
 	end
 
 	local chester = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_chester")
 
 	if not chester then
-		player.components.talker:Say("My Chester is missing!")
+		local missing_message = prompts_missing[player.prefab] or "Chester is missing!"
+		player.components.talker:Say(missing_message)
 		return
 	end
 
@@ -91,8 +99,8 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 		inst.components.named:SetName(name)
 		inst.Nickname = name
 
-		local success_message = "I renamed my Chester to " .. name .. "!"
-		player.components.talker:Say(success_message)
+		local rename_message = prompts_rename(player.prefab, name)
+		player.components.talker:Say(rename_message)
 	end)
 end)
 

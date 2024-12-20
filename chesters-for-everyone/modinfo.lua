@@ -2,12 +2,12 @@ name = "Chesters for Everyone"
 description = [[
 Version 0.9.0 (Beta)
 
-This mod spawns a personal Eye Bone for each player, giving everyone their very own Chester!
+This mod spawns an Eye Bone for each player, giving everyone their very own Chester!
 
 Rename your Chester using chat commands:
+
 /rename_chester <name>
 /rc <name> (short version)
-
 
 
 

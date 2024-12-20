@@ -2,39 +2,41 @@ local rename = function(character, name)
 	local response = "I renamed my Chester to " .. name .. "!"
 
 	if character == "wilson" then
-		response = "A fresh new name for you, " .. name .. "!"
+		response = "Perfect! " .. name .. " it is!"
 	elseif character == "willow" then
-		response = "Burn the old name! " .. name .. " is way better."
+		response = "Ha! " .. name .. " is way better."
 	elseif character == "wolfgang" then
 		response = "Wolfgang call tiny chest " .. name .. " now!"
 	elseif character == "wendy" then
 		response = name .. ", a new name for my gloomy companion."
 	elseif character == "wx78" then
-		response = "SUCCESS: " .. name .. " DESIGNATION ACCEPTED"
+		response = "DESIGNATION ACCEPTED: " .. name
 	elseif character == "wickerbottom" then
-		response = "Yes, " .. name .. ". Quite fitting, don't you think?"
+		response = "Yes, " .. name .. ". It's quite fitting."
 	elseif character == "woodie" then
 		response = "Alright, " .. name .. " it is, eh?"
+	elseif character == "wes" then
+		response = "..."
 	elseif character == "waxwell" then
 		response = name .. ". It suits him, I suppose."
 	elseif character == "wigfrid" then
-		response = name .. "? A name fit för a warriör!"
+		response = name .. "? What an hönörable name!"
 	elseif character == "webber" then
-		response = "He now goes by " .. name .. ". I think he likes it!"
+		response = name .. "? I think he likes it!"
 	elseif character == "winona" then
-		response = name .. ". A practical name for a practical friend."
+		response = name .. ", a practical name for a practical friend."
 	elseif character == "warly" then
-		response = name .. ", a name as dependable as my best recipe!"
+		response = "Oui, " .. name .. " is perfect!"
 	elseif character == "wortox" then
-		response = name .. "? A name with a touch of mischief!"
+		response = name .. ", a name with a touch of mischief!"
 	elseif character == "wormwood" then
 		response = "Chester friend now " .. name .. ". Good name."
 	elseif character == "wurt" then
-		response = name .. "? A name that fits his little, loyal heart!"
+		response = name .. "! It fits his little, loyal heart!"
 	elseif character == "walter" then
 		response = name .. ", a great name for my best friend!"
 	elseif character == "wanda" then
-		response = "Time changes everything, even names. " .. name .. " it is."
+		response = name .. ". Time changes everything, even names."
 	end
 
 	return response

@@ -1,6 +1,5 @@
 PrefabFiles = { "cfe_eyebone", "cfe_chester" }
 
-local prompts_missing = require("prompts/missing_chester")
 local prompts_private = require("prompts/private_chester")
 local prompts_taken = require("prompts/name_taken")
 local prompts_rename = require("prompts/rename_chester")
@@ -86,7 +85,7 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	local chester = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_chester")
 
 	if not chester then
-		local missing_message = prompts_missing[player.prefab] or "Chester is missing!"
+		local missing_message = "Oh no... Chester is missing!"
 		player.components.talker:Say(missing_message)
 		return
 	end

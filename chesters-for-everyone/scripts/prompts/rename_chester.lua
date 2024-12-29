@@ -20,7 +20,7 @@ local rename = function(character, name)
 	elseif character == "waxwell" then
 		response = name .. ". It suits him, I suppose."
 	elseif character == "wigfrid" then
-		response = name .. "? What an hönörable name!"
+		response = name .. "? An hönörable name!"
 	elseif character == "webber" then
 		response = name .. "? I think he likes it!"
 	elseif character == "winona" then

@@ -1,8 +1,8 @@
 name = "Chesters for Everyone"
 description = [[
-Version 0.9.0 (Beta)
+Release v1.0.0
 
-This mod spawns an Eye Bone for each player, giving everyone their very own Chester!
+This mod spawns an Eye Bone for each player entering the world, giving all players their very own Chester!
 
 Rename your Chester using chat commands:
 
@@ -15,17 +15,33 @@ Rename your Chester using chat commands:
 Note: This mod does not spawn a Snow or Shadow Chester. The player is still responsible for its transformation.
 ]]
 author = "Athena"
-version = "0.9.0"
+version = "1.0.0"
 api_version = 10
 
 configuration_options = {
 	{
-		name = "chester_access",
-		label = "Chester Inventory Access",
-		hover = "The level of access for all personal Chesters. Setting it to Private means players can only open their own Chesters.",
+		name = "chester_rename",
+		label = "Allow Chester Rename",
+		hover = "Set if players are allowed to rename their own Chesters.",
 		options = {
 			{
-				description = "Public (Default)",
+				description = "Enabled",
+				data = true,
+			},
+			{
+				description = "Disabled",
+				data = false,
+			},
+		},
+		default = true,
+	},
+	{
+		name = "chester_access",
+		label = "Chester Inventory Access",
+		hover = "Set if players can open all Chesters or only their own.",
+		options = {
+			{
+				description = "Public",
 				data = "public",
 			},
 			{

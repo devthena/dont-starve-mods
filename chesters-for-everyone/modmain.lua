@@ -5,6 +5,7 @@ local prompts_taken = require("prompts/name_taken")
 local prompts_rename = require("prompts/rename_chester")
 
 local chester_access = GetModConfigData("chester_access")
+local chester_rename = GetModConfigData("chester_rename")
 
 local function SpawnEyeBone(player)
 	local player_name = player:GetDisplayName()
@@ -71,6 +72,11 @@ local id_table = {
 }
 
 AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
+	if not chester_rename then
+		player.components.talker:Say("I can't do that in this server.")
+		return
+	end
+
 	if not name or name == "" then
 		player.components.talker:Say("Usage: /rename_chester <name>")
 		return
@@ -108,14 +114,14 @@ AddUserCommand("rename_chester", {
 	prettyname = "Rename Chester",
 	desc = "Rename your own Chester with a custom name.",
 	permission = GLOBAL.COMMAND_PERMISSION.USER,
-	params = { "n1", "n2", "n3" },
+	params = { "name", "n2", "n3" },
 	paramsoptional = { false, true, true },
 	slash = true,
 	usermenu = false,
 	servermenu = false,
 	vote = false,
 	localfn = function(params)
-		local s = (params.n1 or "") .. " " .. (params.n2 or "") .. " " .. (params.n3 or "")
+		local s = (params.name or "") .. " " .. (params.n2 or "") .. " " .. (params.n3 or "")
 		s = s:match("^%s*(.-)%s*$")
 		SendModRPCToServer(GetModRPC(id_table.namespace, id_table.id), s)
 	end,

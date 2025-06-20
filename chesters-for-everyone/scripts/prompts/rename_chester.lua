@@ -6,7 +6,7 @@ local rename = function(character, name)
 	elseif character == "willow" then
 		response = "Ha! " .. name .. " is way better."
 	elseif character == "wolfgang" then
-		response = "Wolfgang call tiny chest " .. name .. " now!"
+		response = "Wolfgang call tiny chest " .. name .. "!"
 	elseif character == "wendy" then
 		response = name .. ", a new name for my gloomy companion."
 	elseif character == "wx78" then
@@ -19,7 +19,7 @@ local rename = function(character, name)
 		response = "..."
 	elseif character == "waxwell" then
 		response = name .. ". It suits him, I suppose."
-	elseif character == "wigfrid" then
+	elseif character == "wathgrithr" then
 		response = name .. "? An hönörable name!"
 	elseif character == "webber" then
 		response = name .. "? I think he likes it!"
@@ -30,13 +30,13 @@ local rename = function(character, name)
 	elseif character == "wortox" then
 		response = name .. ", a name with a touch of mischief!"
 	elseif character == "wormwood" then
-		response = "Chester friend now " .. name .. ". Good name."
+		response = "Chester now " .. name .. ". Good name."
 	elseif character == "wurt" then
-		response = name .. "! It fits his little, loyal heart!"
+		response = name .. "! It fits his little heart!"
 	elseif character == "walter" then
 		response = name .. ", a great name for my best friend!"
 	elseif character == "wanda" then
-		response = name .. ". Time changes everything, even names."
+		response = name .. ". Even names change with time."
 	end
 
 	return response

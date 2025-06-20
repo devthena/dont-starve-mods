@@ -50,6 +50,9 @@ local function OnContainerOpen(self)
 	end
 end
 
+GLOBAL.PREFAB_SKINS["cfe_chester"] = GLOBAL.PREFAB_SKINS["chester"]
+GLOBAL.PREFAB_SKINS["cfe_eyebone"] = GLOBAL.PREFAB_SKINS["chester_eyebone"]
+
 AddPrefabPostInit("cfe_chester", function(inst)
 	if inst.components.container then
 		OnContainerOpen(inst.components.container)

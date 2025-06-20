@@ -668,17 +668,16 @@ local function create_chester()
 	MakeCharacterPhysics(inst, 75, 0.5)
 
 	inst.Physics:SetCollisionGroup(COLLISION.CHARACTERS)
-	inst.Physics:ClearCollisionMask()
-	inst.Physics:CollidesWith(COLLISION.WORLD)
-	inst.Physics:CollidesWith(COLLISION.OBSTACLES)
-	inst.Physics:CollidesWith(COLLISION.CHARACTERS)
+	inst.Physics:SetCollisionMask(COLLISION.WORLD, COLLISION.OBSTACLES, COLLISION.CHARACTERS)
 
 	inst:AddTag("companion")
 	inst:AddTag("character")
+	inst:AddTag("cfe_chester")
 	inst:AddTag("scarytoprey")
 	inst:AddTag("notraptrigger")
 	inst:AddTag("noauradamage")
 	inst:AddTag("devourable")
+	inst:AddTag("NOBLOCK")
 
 	inst.MiniMapEntity:SetIcon("chester.png")
 	inst.MiniMapEntity:SetCanUseCache(false)
@@ -749,10 +748,10 @@ local function create_chester()
 	inst.components.sleeper:SetSleepTest(ShouldSleep)
 	inst.components.sleeper:SetWakeTest(ShouldWakeUp)
 
+	SwitchToContainer(inst)
+
 	MakeHauntableDropFirstItem(inst)
 	AddHauntableCustomReaction(inst, OnHaunt, false, false, true)
-
-	SwitchToContainer(inst)
 
 	inst.sounds = sounds
 

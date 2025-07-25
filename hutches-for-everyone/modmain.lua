@@ -1,3 +1,5 @@
+PrefabFiles = { "cfe_eyebone", "cfe_chester" }
+
 local hutch_access = GetModConfigData("hutch_access")
 local hutch_rename = GetModConfigData("hutch_rename")
 
@@ -5,16 +7,16 @@ local function SpawnFishBowl(player)
 	local player_name = player:GetDisplayName()
 	local x, y, z = player.Transform:GetWorldPosition()
 
-	local eyebone = GLOBAL.SpawnPrefab("hfe_fishbowl")
+	local hutch = GLOBAL.SpawnPrefab("hfe_fishbowl")
 
-	eyebone.PlayerID = player.userid
-	eyebone.PlayerName = player_name
+	hutch.PlayerID = player.userid
+	hutch.PlayerName = player_name
 
-	eyebone:AddTag(player.userid .. "_fishbowl")
-	eyebone:AddComponent("named")
-	eyebone.components.named:SetName(player_name .. "'s Star-Sky")
+	hutch:AddTag(player.userid .. "_fishbowl")
+	hutch:AddComponent("named")
+	hutch.components.named:SetName(player_name .. "'s Star-Sky")
 
-	eyebone.Transform:SetPosition(x + 3, y, z)
+	hutch.Transform:SetPosition(x + 3, y, z)
 end
 
 local function OnPlayerJoin(player)

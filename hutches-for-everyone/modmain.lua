@@ -1,4 +1,4 @@
-PrefabFiles = { "cfe_eyebone", "cfe_chester" }
+PrefabFiles = { "hfe_fishbowl", "hfe_hutch" }
 
 local hutch_access = GetModConfigData("hutch_access")
 local hutch_rename = GetModConfigData("hutch_rename")

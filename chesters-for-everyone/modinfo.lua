@@ -1,6 +1,6 @@
 name = "Chesters for Everyone"
 description = [[
-Release v1.0.2
+Release v1.0.3
 
 This mod spawns an Eye Bone for each player entering the world, giving all players their very own Chester!
 
@@ -15,7 +15,7 @@ Rename your Chester using chat commands:
 Note: This mod does not spawn a Snow or Shadow Chester. The player is still responsible for its transformation.
 ]]
 author = "Athena"
-version = "1.0.2"
+version = "1.0.3"
 api_version = 10
 
 configuration_options = {

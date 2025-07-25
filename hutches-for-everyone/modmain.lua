@@ -1,5 +1,9 @@
 PrefabFiles = { "hfe_fishbowl", "hfe_hutch" }
 
+local prompts_private = require("prompts/private_hutch")
+local prompts_taken = require("prompts/name_taken")
+local prompts_rename = require("prompts/rename_hutch")
+
 local hutch_access = GetModConfigData("hutch_access")
 local hutch_rename = GetModConfigData("hutch_rename")
 
@@ -37,7 +41,7 @@ local function OnContainerOpen(self)
 
 	function self:Open(doer)
 		if hutch_access == "private" and self.inst.PlayerID ~= doer.userid then
-			local locked_message = "Hm, this is not my Hutch."
+			local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Hutch."
 			doer.components.talker:Say(locked_message)
 			return
 		end
@@ -82,7 +86,7 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	end
 
 	if name:lower() == "hutch" then
-		local basic_name_message = "Hm, maybe another name."
+		local basic_name_message = prompts_taken[player.prefab] or "Hm, maybe another name."
 		player.components.talker:Say(basic_name_message)
 		return
 	end
@@ -103,7 +107,7 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 		inst.components.named:SetName(name)
 		inst.Nickname = name
 
-		local rename_message = "I renamed my Hutch to " .. name .. "!"
+		local rename_message = prompts_rename(player.prefab, name)
 		player.components.talker:Say(rename_message)
 	end)
 end)

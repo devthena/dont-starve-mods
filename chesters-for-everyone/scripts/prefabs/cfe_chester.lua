@@ -704,7 +704,13 @@ local function create_chester()
 
 		inst.OnEntityReplicated = function(inst)
 			if inst.replica.container ~= nil then
-				inst.replica.container:WidgetSetup("chester")
+				local containerName = "chester"
+
+				if inst:HasTag("shadow_aligned") then
+					containerName = "shadowchester"
+				end
+
+				inst.replica.container:WidgetSetup(containerName)
 			end
 		end
 

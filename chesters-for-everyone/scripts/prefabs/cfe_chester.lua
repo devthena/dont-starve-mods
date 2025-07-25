@@ -821,6 +821,4 @@ local function swirl_fn()
 	return inst
 end
 
---------------------------------------------------------------------------
-
 return Prefab("cfe_chester", create_chester, assets, prefabs), Prefab("shadow_chester_swirl_fx", swirl_fn, assets_swirl)

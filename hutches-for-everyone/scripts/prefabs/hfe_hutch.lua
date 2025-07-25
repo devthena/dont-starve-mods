@@ -746,6 +746,12 @@ local function hutch_music_light_fx()
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
+		inst.OnEntityReplicated = function(inst)
+			if inst.replica.container ~= nil then
+				inst.replica.container:WidgetSetup("hutch")
+			end
+		end
+
 		return inst
 	end
 

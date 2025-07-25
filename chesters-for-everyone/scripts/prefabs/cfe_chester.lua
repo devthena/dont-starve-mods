@@ -74,6 +74,10 @@ local function OnOpen(inst, player)
 		return
 	end
 
+	if player == nil then
+		return
+	end
+
 	if chester_access == "public" or inst.PlayerID == player.doer.userid then
 		inst.sg:GoToState("open")
 	end

@@ -1,6 +1,6 @@
 name = "Hutches for Everyone"
 description = [[
-Release v1.0.0
+Version v0.1.0 (BETA)
 
 This mod spawns a Star-Sky for each player entering the Caves, giving all players their very own Hutch!
 
@@ -15,7 +15,7 @@ Rename your Hutch using chat commands:
 Note: This mod does not spawn a Fugu or Music Box Hutch. The player is still responsible for its transformation.
 ]]
 author = "Athena"
-version = "1.0.0"
+version = "0.1.0"
 api_version = 10
 
 configuration_options = {

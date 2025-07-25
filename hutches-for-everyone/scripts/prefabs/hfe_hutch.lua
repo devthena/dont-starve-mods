@@ -4,10 +4,8 @@ local assets = {
 	Asset("ANIM", "anim/hutch_build.zip"),
 	Asset("ANIM", "anim/hutch_musicbox_build.zip"),
 	Asset("ANIM", "anim/hutch_pufferfish_build.zip"),
-
 	Asset("SOUND", "sound/chester.fsb"),
 	Asset("SOUND", "sound/together.fsb"),
-
 	Asset("MINIMAP_IMAGE", "hutch"),
 	Asset("MINIMAP_IMAGE", "hutch_musicbox"),
 	Asset("MINIMAP_IMAGE", "hutch_pufferfish"),
@@ -469,6 +467,12 @@ local function create_hutch()
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
+		inst.OnEntityReplicated = function(inst)
+			if inst.replica.container ~= nil then
+				inst.replica.container:WidgetSetup("hutch")
+			end
+		end
+
 		return inst
 	end
 
@@ -551,8 +555,6 @@ local function create_hutch()
 
 	return inst
 end
-
------------------------------------------------------------------
 
 local STATE_TO_FXANIM = {
 	["walk"] = "walk1_loop",
@@ -746,12 +748,6 @@ local function hutch_music_light_fx()
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
-		inst.OnEntityReplicated = function(inst)
-			if inst.replica.container ~= nil then
-				inst.replica.container:WidgetSetup("hutch")
-			end
-		end
-
 		return inst
 	end
 

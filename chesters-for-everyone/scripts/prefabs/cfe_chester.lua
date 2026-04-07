@@ -29,6 +29,7 @@ local prefabs = {
 }
 
 local brain = require("brains/chesterbrain")
+local prompts_private = require("prompts/private_chester")
 
 local ChesterStateNames = {
 	"NORMAL",
@@ -78,9 +79,18 @@ local function OnOpen(inst, player)
 		return
 	end
 
-	if chester_access == "public" or inst.PlayerID == player.doer.userid then
-		inst.sg:GoToState("open")
+	local doer = player.doer
+	if doer == nil then
+		return
 	end
+
+	if chester_access == "private" and inst.PlayerID ~= doer.userid then
+		local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Chester."
+		doer.components.talker:Say(locked_message)
+		return
+	end
+
+	inst.sg:GoToState("open")
 end
 
 local function OnClose(inst)
@@ -172,13 +182,13 @@ local SIDE_FACING_ANIMS = {
 }
 
 local function GetBreathAnimFacing(inst)
-	for i, v in ipairs(DOWN_FACING_ANIMS) do
+	for _, v in ipairs(DOWN_FACING_ANIMS) do
 		if inst.AnimState:IsCurrentAnimation(v) then
 			return FACING_DOWN
 		end
 	end
 
-	for i, v in ipairs(SIDE_FACING_ANIMS) do
+	for _, v in ipairs(SIDE_FACING_ANIMS) do
 		if inst.AnimState:IsCurrentAnimation(v) then
 			return FACING_RIGHT
 		end

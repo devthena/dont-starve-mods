@@ -120,27 +120,29 @@ local function GetSpawnPoint(pt)
 end
 
 local function SpawnChester(inst)
+	if inst.PlayerID == nil or inst.PlayerName == nil then
+		return
+	end
+
 	local pt = inst:GetPosition()
-	local spawn_pt = GetSpawnPoint(pt)
+	local spawn_pt = GetSpawnPoint(pt) or pt
 
-	if spawn_pt ~= nil then
-		local chester = SpawnPrefab("cfe_chester", inst.linked_skinname, inst.skin_id)
+	local chester = SpawnPrefab("cfe_chester", inst.linked_skinname, inst.skin_id)
 
-		if chester ~= nil and inst.PlayerID ~= nil and inst.PlayerName ~= nil then
-			chester.PlayerID = inst.PlayerID
+	if chester ~= nil then
+		chester.PlayerID = inst.PlayerID
 
-			local nickname = inst.PlayerName .. "'s Chester"
-			chester.Nickname = nickname
+		local nickname = inst.PlayerName .. "'s Chester"
+		chester.Nickname = nickname
 
-			chester:AddTag(inst.PlayerID .. "_chester")
-			chester:AddComponent("named")
-			chester.components.named:SetName(nickname)
+		chester:AddTag(inst.PlayerID .. "_chester")
+		chester:AddComponent("named")
+		chester.components.named:SetName(nickname)
 
-			chester.Physics:Teleport(spawn_pt:Get())
-			chester:FacePoint(pt:Get())
+		chester.Physics:Teleport(spawn_pt:Get())
+		chester:FacePoint(pt:Get())
 
-			return chester
-		end
+		return chester
 	end
 end
 
@@ -159,13 +161,14 @@ local function RebindChester(inst, chester)
 
 	if chester ~= nil then
 		OpenEye(inst)
-		inst:ListenForEvent("death", function()
-			StartRespawn(inst, TUNING.CHESTER_RESPAWN_TIME)
-		end, chester)
 
 		if chester.components.follower.leader ~= inst then
 			chester.components.follower:SetLeader(inst)
+			inst:ListenForEvent("death", function()
+				StartRespawn(inst, TUNING.CHESTER_RESPAWN_TIME)
+			end, chester)
 		end
+
 		return true
 	end
 end

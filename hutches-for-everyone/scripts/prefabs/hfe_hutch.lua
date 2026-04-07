@@ -25,6 +25,7 @@ local prefabs = {
 }
 
 local brain = require("brains/chesterbrain")
+local prompts_private = require("prompts/private_hutch")
 
 local sounds = {
 	sleep = "dontstarve/creatures/together/hutch/sleep",
@@ -65,9 +66,22 @@ local function OnOpen(inst, player)
 		return
 	end
 
-	if hutch_access == "public" or inst.PlayerID == player.doer.userid then
-		inst.sg:GoToState("open")
+	if player == nil then
+		return
 	end
+
+	local doer = player.doer
+	if doer == nil then
+		return
+	end
+
+	if hutch_access == "private" and inst.PlayerID ~= doer.userid then
+		local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Hutch."
+		doer.components.talker:Say(locked_message)
+		return
+	end
+
+	inst.sg:GoToState("open")
 end
 
 local function OnClose(inst)

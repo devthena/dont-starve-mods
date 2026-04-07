@@ -1,72 +1,52 @@
 PrefabFiles = { "hfe_fishbowl", "hfe_hutch" }
 
-local prompts_private = require("prompts/private_hutch")
 local prompts_taken = require("prompts/name_taken")
 local prompts_rename = require("prompts/rename_hutch")
 
-local hutch_access = GetModConfigData("hutch_access")
 local hutch_rename = GetModConfigData("hutch_rename")
 
 local function SpawnFishBowl(player)
 	local player_name = player:GetDisplayName()
 	local x, y, z = player.Transform:GetWorldPosition()
+	local pt = Vector3(x, y, z)
 
-	local hutch = GLOBAL.SpawnPrefab("hfe_fishbowl")
+	local theta = math.random() * 2 * math.pi
+	local offset = FindWalkableOffset(pt, theta, 3, 8, true)
+	local spawn_pt = offset ~= nil and (pt + offset) or pt
 
-	hutch.PlayerID = player.userid
-	hutch.PlayerName = player_name
+	local fishbowl = SpawnPrefab("hfe_fishbowl")
 
-	hutch:AddTag(player.userid .. "_fishbowl")
-	hutch:AddComponent("named")
-	hutch.components.named:SetName(player_name .. "'s Star-Sky")
+	fishbowl.PlayerID = player.userid
+	fishbowl.PlayerName = player_name
 
-	hutch.Transform:SetPosition(x + 3, y, z)
+	fishbowl:AddTag(player.userid .. "_fishbowl")
+	fishbowl:AddComponent("named")
+	fishbowl.components.named:SetName(player_name .. "'s Star-Sky")
+
+	fishbowl.Transform:SetPosition(spawn_pt:Get())
 end
 
 local function OnPlayerJoin(player)
-	if GLOBAL.TheWorld == nil or not GLOBAL.TheWorld:HasTag("cave") then
+	if TheWorld == nil or not TheWorld:HasTag("cave") then
 		return
 	end
 
-	if GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_fishbowl") == nil then
+	if TheSim:FindFirstEntityWithTag(player.userid .. "_fishbowl") == nil then
 		SpawnFishBowl(player)
 	end
 end
 
-local function OnContainerOpen(self)
-	local original_open = self.Open
-	if not original_open then
-		return
-	end
-
-	function self:Open(doer)
-		if hutch_access == "private" and self.inst.PlayerID ~= doer.userid then
-			local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Hutch."
-			doer.components.talker:Say(locked_message)
-			return
-		end
-
-		original_open(self, doer)
-	end
-end
-
-GLOBAL.PREFAB_SKINS["hfe_hutch"] = GLOBAL.PREFAB_SKINS["hutch"]
-GLOBAL.PREFAB_SKINS["hfe_fishbowl"] = GLOBAL.PREFAB_SKINS["hutch_fishbowl"]
+PREFAB_SKINS["hfe_hutch"] = PREFAB_SKINS["hutch"]
+PREFAB_SKINS["hfe_fishbowl"] = PREFAB_SKINS["hutch_fishbowl"]
 
 local id_table = {
 	namespace = "hutches-for-everyone",
 	id = "rename_hutch",
 }
 
-AddPrefabPostInit("hfe_hutch", function(inst)
-	if inst.components.container then
-		OnContainerOpen(inst.components.container)
-	end
-end)
-
 AddSimPostInit(function()
-	if GLOBAL.TheWorld ~= nil and GLOBAL.TheWorld.ismastersim and GLOBAL.TheWorld:HasTag("cave") then
-		GLOBAL.TheWorld:ListenForEvent("ms_playerjoined", function(_inst, player)
+	if TheWorld ~= nil and TheWorld.ismastersim and TheWorld:HasTag("cave") then
+		TheWorld:ListenForEvent("ms_playerjoined", function(_, player)
 			if player then
 				OnPlayerJoin(player)
 			end
@@ -85,47 +65,52 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 		return
 	end
 
+	if #name > 30 then
+		player.components.talker:Say("That name is too long!")
+		return
+	end
+
 	if name:lower() == "hutch" then
 		local basic_name_message = prompts_taken[player.prefab] or "Hm, maybe another name."
 		player.components.talker:Say(basic_name_message)
 		return
 	end
 
-	local hutch = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_hutch")
+	local hutch = TheSim:FindFirstEntityWithTag(player.userid .. "_hutch")
 
 	if not hutch then
-		local missing_message = "Oh no... Hutch is missing!"
-		player.components.talker:Say(missing_message)
+		player.components.talker:Say("Oh no... Hutch is missing!")
 		return
 	end
 
-	hutch:DoTaskInTime(0, function(inst)
-		if not inst.components.named then
-			inst:AddComponent("named")
-		end
+	if not hutch.components.named then
+		hutch:AddComponent("named")
+	end
 
-		inst.components.named:SetName(name)
-		inst.Nickname = name
+	hutch.components.named:SetName(name)
+	hutch.Nickname = name
 
-		local rename_message = prompts_rename(player.prefab, name)
-		player.components.talker:Say(rename_message)
-	end)
+	player.components.talker:Say(prompts_rename(player.prefab, name))
 end)
 
 AddUserCommand("rename_hutch", {
 	aliases = { "rh" },
 	prettyname = "Rename Hutch",
 	desc = "Rename your own Hutch with a custom name.",
-	permission = GLOBAL.COMMAND_PERMISSION.USER,
-	params = { "first", "middle", "last" },
-	paramsoptional = { false, true, true },
+	permission = COMMAND_PERMISSION.USER,
+	params = { "name", "n2", "n3", "n4", "n5" },
+	paramsoptional = { false, true, true, true, true },
 	slash = true,
 	usermenu = false,
 	servermenu = false,
 	vote = false,
 	localfn = function(params)
-		local s = (params.first or "") .. " " .. (params.middle or "") .. " " .. (params.last or "")
-		s = s:match("^%s*(.-)%s*$")
-		SendModRPCToServer(GetModRPC(id_table.namespace, id_table.id), s)
+		local parts = {}
+		for _, key in ipairs({ "name", "n2", "n3", "n4", "n5" }) do
+			if params[key] and params[key] ~= "" then
+				table.insert(parts, params[key])
+			end
+		end
+		SendModRPCToServer(GetModRPC(id_table.namespace, id_table.id), table.concat(parts, " "))
 	end,
 })

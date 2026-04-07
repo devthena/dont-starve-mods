@@ -55,42 +55,33 @@ end
 
 local function GetSpawnPoint(pt)
 	local offset = FindWalkableOffset(pt, math.random() * TWOPI, SPAWN_DIST, 12, true, true, NoHoles)
-
-	if offset ~= nil then
-		offset.x = offset.x + pt.x
-		offset.z = offset.z + pt.z
-
-		return offset
-	end
+	return offset ~= nil and (pt + offset) or nil
 end
 
 local function SpawnHutch(inst)
+	if inst.PlayerID == nil or inst.PlayerName == nil then
+		return
+	end
+
 	local pt = inst:GetPosition()
-	local spawn_pt = GetSpawnPoint(pt)
+	local spawn_pt = GetSpawnPoint(pt) or pt
 
-	if spawn_pt ~= nil then
-		local hutch = SpawnPrefab("hfe_hutch", inst.linked_skinname, inst.skin_id)
+	local hutch = SpawnPrefab("hfe_hutch", inst.linked_skinname, inst.skin_id)
 
-		if hutch ~= nil then
-			hutch.Physics:Teleport(spawn_pt:Get())
-			hutch:FacePoint(pt:Get())
+	if hutch ~= nil then
+		hutch.PlayerID = inst.PlayerID
 
-			if inst.PlayerID ~= nil and inst.PlayerName ~= nil then
-				hutch.PlayerID = inst.PlayerID
+		local nickname = inst.PlayerName .. "'s Hutch"
+		hutch.Nickname = nickname
 
-				local nickname = inst.PlayerName .. "'s Hutch"
-				hutch.Nickname = nickname
+		hutch:AddTag(inst.PlayerID .. "_hutch")
+		hutch:AddComponent("named")
+		hutch.components.named:SetName(nickname)
 
-				hutch:AddTag(inst.PlayerID .. "_hutch")
-				hutch:AddComponent("named")
-				hutch.components.named:SetName(nickname)
+		hutch.Physics:Teleport(spawn_pt:Get())
+		hutch:FacePoint(pt:Get())
 
-				hutch.Physics:Teleport(spawn_pt:Get())
-				hutch:FacePoint(pt:Get())
-			end
-
-			return hutch
-		end
+		return hutch
 	end
 end
 
@@ -115,12 +106,11 @@ local function RebindHutch(inst, hutch)
 	if hutch ~= nil then
 		FishAlive(inst)
 
-		inst:ListenForEvent("death", function()
-			StartRespawn(inst, TUNING.HUTCH_RESPAWN_TIME)
-		end, hutch)
-
 		if hutch.components.follower.leader ~= inst then
 			hutch.components.follower:SetLeader(inst)
+			inst:ListenForEvent("death", function()
+				StartRespawn(inst, TUNING.HUTCH_RESPAWN_TIME)
+			end, hutch)
 		end
 
 		return true

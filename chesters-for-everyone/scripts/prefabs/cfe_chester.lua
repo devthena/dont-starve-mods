@@ -29,7 +29,7 @@ local prefabs = {
 }
 
 local brain = require("brains/chesterbrain")
-local prompts_private = require("prompts/private_chester")
+local strings = require("strings")
 
 local ChesterStateNames = {
 	"NORMAL",
@@ -37,6 +37,7 @@ local ChesterStateNames = {
 	"SHADOW",
 }
 
+---@diagnostic disable-next-line: undefined-field
 local ChesterState = table.invert(ChesterStateNames)
 
 local sounds = {
@@ -85,7 +86,7 @@ local function OnOpen(inst, player)
 	end
 
 	if chester_access == "private" and inst.PlayerID ~= doer.userid then
-		local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Chester."
+		local locked_message = strings.private[doer.prefab] or strings.private.DEFAULT
 		doer.components.talker:Say(locked_message)
 		return
 	end
@@ -108,6 +109,8 @@ local function OnStartFollowing(inst)
 	inst:AddTag("companion")
 end
 
+local SKIN_SYMBOLS = { "chester_body", "chester_foot", "chester_lid", "chester_tongue" }
+
 local function SetBuild(inst)
 	local skin_build = inst:GetSkinBuild()
 	local chester_state = inst._chesterstate:value()
@@ -117,34 +120,9 @@ local function SetBuild(inst)
 			or (chester_state == ChesterState.SNOW and "_snow")
 			or ""
 
-		inst.AnimState:OverrideItemSkinSymbol(
-			"chester_body",
-			skin_build,
-			"chester_body" .. state,
-			inst.GUID,
-			"chester_build"
-		)
-		inst.AnimState:OverrideItemSkinSymbol(
-			"chester_foot",
-			skin_build,
-			"chester_foot" .. state,
-			inst.GUID,
-			"chester_build"
-		)
-		inst.AnimState:OverrideItemSkinSymbol(
-			"chester_lid",
-			skin_build,
-			"chester_lid" .. state,
-			inst.GUID,
-			"chester_build"
-		)
-		inst.AnimState:OverrideItemSkinSymbol(
-			"chester_tongue",
-			skin_build,
-			"chester_tongue" .. state,
-			inst.GUID,
-			"chester_build"
-		)
+		for _, symbol in ipairs(SKIN_SYMBOLS) do
+			inst.AnimState:OverrideItemSkinSymbol(symbol, skin_build, symbol .. state, inst.GUID, "chester_build")
+		end
 	else
 		inst.AnimState:ClearAllOverrideSymbols()
 
@@ -399,7 +377,7 @@ local function EnableShadowBreath(inst, enable)
 		inst.shadowbreath.task:Cancel()
 		inst.shadowbreath.task2:Cancel()
 
-		for i, v in ipairs(inst.shadowbreath.pool) do
+		for _, v in ipairs(inst.shadowbreath.pool) do
 			v:Remove()
 		end
 
@@ -716,15 +694,15 @@ local function create_chester()
 	if not TheWorld.ismastersim then
 		inst:ListenForEvent("chesterstatedirty", OnClientChesterStateDirty)
 
-		inst.OnEntityReplicated = function(inst)
-			if inst.replica.container ~= nil then
+		inst.OnEntityReplicated = function(_inst)
+			if _inst.replica.container ~= nil then
 				local containerName = "chester"
 
-				if inst:HasTag("shadow_aligned") then
+				if _inst:HasTag("shadow_aligned") then
 					containerName = "shadowchester"
 				end
 
-				inst.replica.container:WidgetSetup(containerName)
+				_inst.replica.container:WidgetSetup(containerName)
 			end
 		end
 
@@ -774,10 +752,6 @@ local function create_chester()
 	AddHauntableCustomReaction(inst, OnHaunt, false, false, true)
 
 	inst.sounds = sounds
-
-	-- additional custom variables
-	inst.PlayerID = nil
-	inst.Nickname = nil
 
 	inst:SetStateGraph("SGchester")
 	inst.sg:GoToState("idle")

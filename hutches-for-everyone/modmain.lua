@@ -1,7 +1,6 @@
 PrefabFiles = { "hfe_fishbowl", "hfe_hutch" }
 
-local prompts_taken = require("prompts/name_taken")
-local prompts_rename = require("prompts/rename_hutch")
+local strings = require("strings")
 
 local hutch_rename = GetModConfigData("hutch_rename")
 
@@ -56,30 +55,29 @@ end)
 
 AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	if not hutch_rename then
-		player.components.talker:Say("I can't do that in this server.")
+		player.components.talker:Say(strings.system.rename_disabled)
 		return
 	end
 
 	if not name or name == "" then
-		player.components.talker:Say("Usage: /rename_hutch <name>")
+		player.components.talker:Say(strings.system.rename_usage)
 		return
 	end
 
 	if #name > 30 then
-		player.components.talker:Say("That name is too long!")
+		player.components.talker:Say(strings.system.name_too_long)
 		return
 	end
 
 	if name:lower() == "hutch" then
-		local basic_name_message = prompts_taken[player.prefab] or "Hm, maybe another name."
-		player.components.talker:Say(basic_name_message)
+		player.components.talker:Say(strings.name_taken[player.prefab] or strings.name_taken.DEFAULT)
 		return
 	end
 
 	local hutch = TheSim:FindFirstEntityWithTag(player.userid .. "_hutch")
 
 	if not hutch then
-		player.components.talker:Say("Oh no... Hutch is missing!")
+		player.components.talker:Say(strings.system.companion_missing)
 		return
 	end
 
@@ -90,7 +88,8 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	hutch.components.named:SetName(name)
 	hutch.Nickname = name
 
-	player.components.talker:Say(prompts_rename(player.prefab, name))
+	local template = strings.rename[player.prefab] or strings.rename.DEFAULT
+	player.components.talker:Say((template:gsub("{name}", name)))
 end)
 
 AddUserCommand("rename_hutch", {

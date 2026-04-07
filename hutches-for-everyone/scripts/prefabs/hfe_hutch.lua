@@ -25,7 +25,7 @@ local prefabs = {
 }
 
 local brain = require("brains/chesterbrain")
-local prompts_private = require("prompts/private_hutch")
+local strings = require("strings")
 
 local sounds = {
 	sleep = "dontstarve/creatures/together/hutch/sleep",
@@ -76,7 +76,7 @@ local function OnOpen(inst, player)
 	end
 
 	if hutch_access == "private" and inst.PlayerID ~= doer.userid then
-		local locked_message = prompts_private[doer.prefab] or "Hm, this is not my Hutch."
+		local locked_message = strings.private[doer.prefab] or strings.private.DEFAULT
 		doer.components.talker:Say(locked_message)
 		return
 	end
@@ -115,21 +115,21 @@ local function SetNormalLight(inst)
 	inst.Light:SetRadius(LIGHT_RADIUS)
 	inst.Light:SetIntensity(LIGHT_INTENSITY)
 	inst.Light:SetFalloff(LIGHT_FALLOFF)
-	inst.Light:SetColour(unpack(NORMAL_LIGHT_COLOUR))
+	inst.Light:SetColour(table.unpack(NORMAL_LIGHT_COLOUR))
 end
 
 local function SetDimLight(inst)
 	inst.Light:SetRadius(DIM_LIGHT_RADIUS)
 	inst.Light:SetIntensity(DIM_LIGHT_INTENSITY)
 	inst.Light:SetFalloff(DIM_LIGHT_FALLOFF)
-	inst.Light:SetColour(unpack(NORMAL_LIGHT_COLOUR))
+	inst.Light:SetColour(table.unpack(NORMAL_LIGHT_COLOUR))
 end
 
 local function SetMusicLight(inst)
 	inst.Light:SetRadius(LIGHT_RADIUS)
 	inst.Light:SetIntensity(LIGHT_INTENSITY)
 	inst.Light:SetFalloff(LIGHT_FALLOFF)
-	inst.Light:SetColour(unpack(MUSIC_LIGHT_COLOUR))
+	inst.Light:SetColour(table.unpack(MUSIC_LIGHT_COLOUR))
 end
 
 local function LightBattery(item)
@@ -142,10 +142,6 @@ end
 
 local function MusicBattery(item)
 	return item:HasTag("band")
-end
-
-local function FindBattery(inst, fn)
-	return inst.components.container:FindItem(fn)
 end
 
 local function OnReflectDamage(inst, data)
@@ -191,9 +187,9 @@ end
 
 local function CheckBattery(inst)
 	local current_form = inst.components.amorphous:GetCurrentForm()
-	local lightbattery = FindBattery(inst, LightBattery)
-	local pointybattery = current_form == "FUGU" and FindBattery(inst, DamageReflectBattery) or nil
-	local musicbattery = current_form == "MUSIC" and lightbattery ~= nil and FindBattery(inst, MusicBattery) or nil
+	local lightbattery = inst.components.container:FindItem(LightBattery)
+	local pointybattery = current_form == "FUGU" and inst.components.container:FindItem(DamageReflectBattery) or nil
+	local musicbattery = current_form == "MUSIC" and lightbattery ~= nil and inst.components.container:FindItem(MusicBattery) or nil
 
 	if inst._lightbattery ~= lightbattery then
 		if lightbattery ~= nil then
@@ -256,7 +252,7 @@ local function CheckBattery(inst)
 			inst:RemoveComponent("sanityaura")
 			inst.SoundEmitter:KillSound("hutchMusic")
 
-			for i, v in ipairs(inst._groundglows) do
+			for _, v in ipairs(inst._groundglows) do
 				v:Remove()
 			end
 
@@ -265,6 +261,8 @@ local function CheckBattery(inst)
 		inst._musicbattery = musicbattery
 	end
 end
+
+local SKIN_SYMBOLS = { "base", "hutch_body", "hutch_face", "hutch_foot", "hutch_lid", "hutch_lure", "hutch_tail", "hutch_tongue" }
 
 local function SetBuild(inst)
 	local skin_build = inst:GetSkinBuild()
@@ -278,69 +276,11 @@ local function SetBuild(inst)
 			state = "_music"
 		end
 
-		inst.AnimState:OverrideItemSkinSymbol(
-			"base",
-			skin_build,
-			"base" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
+		local def_build = inst.current_def_build or "hutch_build"
 
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_body",
-			skin_build,
-			"hutch_body" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
-
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_face",
-			skin_build,
-			"hutch_face" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
-
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_foot",
-			skin_build,
-			"hutch_foot" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
-
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_lid",
-			skin_build,
-			"hutch_lid" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
-
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_lure",
-			skin_build,
-			"hutch_lure" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
-
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_tail",
-			skin_build,
-			"hutch_tail" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
-
-		inst.AnimState:OverrideItemSkinSymbol(
-			"hutch_tongue",
-			skin_build,
-			"hutch_tongue" .. state,
-			inst.GUID,
-			inst.current_def_build or "hutch_build"
-		)
+		for _, symbol in ipairs(SKIN_SYMBOLS) do
+			inst.AnimState:OverrideItemSkinSymbol(symbol, skin_build, symbol .. state, inst.GUID, def_build)
+		end
 	else
 		inst.AnimState:ClearAllOverrideSymbols()
 		inst.AnimState:SetBuild(inst.current_def_build or "hutch_build")
@@ -370,7 +310,7 @@ local function CreateForm(name, itemtags, build, icon, onenter, onexit)
 		enterformfn = function(inst, instant)
 			if not instant then
 				inst:PushEvent("morph", { morphfn = enterfn })
-			elseif enterfn ~= nil then
+			else
 				enterfn(inst)
 			end
 		end,
@@ -390,8 +330,6 @@ local forms = {
 	CreateForm("MUSIC", { "lightbattery", "band" }, "hutch_musicbox_build", "hutch_musicbox.png", SetMusicLight, nil),
 	CreateForm("NORMAL", nil, "hutch_build", "hutch.png", SetNormalLight, nil),
 }
-
-CreateForm = nil
 
 local function OnHaunt(inst)
 	if math.random() <= TUNING.HAUNT_CHANCE_ALWAYS then
@@ -475,15 +413,15 @@ local function create_hutch()
 	inst.Light:SetRadius(LIGHT_RADIUS)
 	inst.Light:SetIntensity(LIGHT_INTENSITY)
 	inst.Light:SetFalloff(LIGHT_FALLOFF)
-	inst.Light:SetColour(unpack(NORMAL_LIGHT_COLOUR))
+	inst.Light:SetColour(table.unpack(NORMAL_LIGHT_COLOUR))
 	inst.Light:Enable(false)
 
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
-		inst.OnEntityReplicated = function(inst)
-			if inst.replica.container ~= nil then
-				inst.replica.container:WidgetSetup("hutch")
+		inst.OnEntityReplicated = function(_inst)
+			if _inst.replica.container ~= nil then
+				_inst.replica.container:WidgetSetup("hutch")
 			end
 		end
 
@@ -540,10 +478,6 @@ local function create_hutch()
 	inst.sounds = sounds
 	inst.leave_slime = true
 
-	-- additional custom variables
-	inst.PlayerID = nil
-	inst.Nickname = nil
-
 	inst:SetStateGraph("SGchester")
 	inst.sg:GoToState("idle")
 
@@ -551,7 +485,7 @@ local function create_hutch()
 
 	inst:AddComponent("amorphous")
 
-	for i, v in ipairs(forms) do
+	for _, v in ipairs(forms) do
 		inst.components.amorphous:AddForm(v)
 	end
 
@@ -722,8 +656,8 @@ end
 local function InitFX(inst, hutch, data)
 	SerializeFX(inst, data, false)
 
-	inst:ListenForEvent("newstate", function(hutch, data)
-		local animid = STATE_ID[data.statename]
+	inst:ListenForEvent("newstate", function(_, event_data)
+		local animid = STATE_ID[event_data.statename]
 
 		if animid ~= nil then
 			inst._anim:set(animid)

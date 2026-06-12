@@ -602,7 +602,11 @@ local function OnSave(inst, data)
 end
 
 local function OnPreLoad(inst, data)
-	local chester_state = data ~= nil and ChesterState[data.ChesterState] or nil
+	if data == nil then
+		return
+	end
+
+	local chester_state = ChesterState[data.ChesterState]
 
 	if chester_state == ChesterState.SHADOW then
 		DoMorph(inst, MorphShadowChester)

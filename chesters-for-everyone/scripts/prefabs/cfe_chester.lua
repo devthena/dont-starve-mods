@@ -26,6 +26,7 @@ local prefabs = {
 	"globalmapiconunderfog",
 	"frostbreath",
 	"shadow_chester_swirl_fx",
+	"chestercorpse",
 }
 
 local brain = require("brains/chesterbrain")
@@ -71,16 +72,17 @@ local function ShouldKeepTarget()
 	return false
 end
 
-local function OnOpen(inst, player)
+local function OnOpen(inst, data)
 	if inst.components.health:IsDead() then
 		return
 	end
 
-	if player == nil then
+	if data == nil then
+		inst.sg:GoToState("open")
 		return
 	end
 
-	local doer = player.doer
+	local doer = data.doer
 	if doer == nil then
 		return
 	end
@@ -95,7 +97,7 @@ local function OnOpen(inst, player)
 end
 
 local function OnClose(inst)
-	if not inst.components.health:IsDead() and inst.sg.currentstate.name ~= "transition" then
+	if not inst.components.health:IsDead() and inst.sg.currentstate.name ~= "transition" and not inst.sg:HasStateTag("electrocute") then
 		inst.sg.statemem.closing = true
 		inst.sg:GoToState("close")
 	end
@@ -417,6 +419,19 @@ local function SwitchToShadowContainerProxy(inst)
 	inst.components.container_proxy:SetOnCloseFn(OnClose)
 	inst.components.container_proxy:SetCanBeOpened(true)
 
+	if not inst._shadow_access_patched then
+		inst._shadow_access_patched = true
+		local original_open = inst.components.container_proxy.Open
+		inst.components.container_proxy.Open = function(self_proxy, doer)
+			if doer ~= nil and chester_access == "private" and inst.PlayerID ~= doer.userid then
+				local locked_message = strings.private[doer.prefab] or strings.private.DEFAULT
+				doer.components.talker:Say(locked_message)
+				return
+			end
+			original_open(self_proxy, doer)
+		end
+	end
+
 	AttachShadowContainer(inst)
 
 	local x, y, z = inst.Transform:GetWorldPosition()
@@ -693,6 +708,8 @@ local function create_chester()
 	inst:AddComponent("container_proxy")
 	inst.components.container_proxy:SetCanBeOpened(false)
 
+	inst.reskin_tool_cannot_target_this = true
+
 	inst.entity:SetPristine()
 
 	if not TheWorld.ismastersim then
@@ -758,7 +775,6 @@ local function create_chester()
 	inst.sounds = sounds
 
 	inst:SetStateGraph("SGchester")
-	inst.sg:GoToState("idle")
 
 	inst:SetBrain(brain)
 

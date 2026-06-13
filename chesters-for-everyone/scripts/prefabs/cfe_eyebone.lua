@@ -127,7 +127,7 @@ local function SpawnChester(inst)
 	local pt = inst:GetPosition()
 	local spawn_pt = GetSpawnPoint(pt) or pt
 
-	local chester = SpawnPrefab("cfe_chester", inst.linked_skinname, inst.skin_id)
+	local chester = SpawnPrefab("cfe_chester")
 
 	if chester ~= nil then
 		chester.PlayerID = inst.PlayerID
@@ -279,6 +279,8 @@ local function fn()
 	inst.AnimState:PlayAnimation("dead", true)
 	inst.scrapbook_anim = "dead"
 	inst.scrapbook_specialinfo = "EYEBONE"
+
+	inst.reskin_tool_cannot_target_this = true
 
 	inst.entity:SetPristine()
 

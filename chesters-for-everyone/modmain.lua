@@ -35,9 +35,6 @@ local function OnPlayerJoin(player)
 	end
 end
 
-PREFAB_SKINS["cfe_chester"] = PREFAB_SKINS["chester"]
-PREFAB_SKINS["cfe_eyebone"] = PREFAB_SKINS["chester_eyebone"]
-
 AddSimPostInit(function()
 	if TheWorld ~= nil and TheWorld.ismastersim then
 		TheWorld:ListenForEvent("ms_playerjoined", function(_, player)

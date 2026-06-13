@@ -35,9 +35,6 @@ local function OnPlayerJoin(player)
 	end
 end
 
-PREFAB_SKINS["hfe_hutch"] = PREFAB_SKINS["hutch"]
-PREFAB_SKINS["hfe_fishbowl"] = PREFAB_SKINS["hutch_fishbowl"]
-
 local id_table = {
 	namespace = "hutches-for-everyone",
 	id = "rename_hutch",

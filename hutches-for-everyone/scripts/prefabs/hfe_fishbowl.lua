@@ -66,7 +66,7 @@ local function SpawnHutch(inst)
 	local pt = inst:GetPosition()
 	local spawn_pt = GetSpawnPoint(pt) or pt
 
-	local hutch = SpawnPrefab("hfe_hutch", inst.linked_skinname, inst.skin_id)
+	local hutch = SpawnPrefab("hfe_hutch")
 
 	if hutch ~= nil then
 		hutch.PlayerID = inst.PlayerID
@@ -233,6 +233,8 @@ local function fn()
 	inst.AnimState:PlayAnimation("idle_loop", true)
 
 	inst.scrapbook_specialinfo = "HUTCHFISHBOWL"
+
+	inst.reskin_tool_cannot_target_this = true
 
 	inst.entity:SetPristine()
 

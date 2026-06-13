@@ -22,6 +22,7 @@ local prefabs = {
 	"chester_transform_fx",
 	"impact",
 	"globalmapiconunderfog",
+	"chestercorpse",
 }
 
 local brain = require("brains/chesterbrain")
@@ -61,16 +62,16 @@ local function ShouldKeepTarget()
 	return false
 end
 
-local function OnOpen(inst, player)
+local function OnOpen(inst, data)
 	if inst.components.health:IsDead() then
 		return
 	end
 
-	if player == nil then
+	if data == nil then
 		return
 	end
 
-	local doer = player.doer
+	local doer = data.doer
 	if doer == nil then
 		return
 	end
@@ -349,6 +350,10 @@ local function OnSave(inst, data)
 end
 
 local function OnPreLoad(inst, data)
+	if data == nil then
+		return
+	end
+
 	if data.PlayerID ~= nil then
 		inst:AddTag(data.PlayerID .. "_hutch")
 		inst.PlayerID = data.PlayerID
@@ -415,6 +420,8 @@ local function create_hutch()
 	inst.Light:SetFalloff(LIGHT_FALLOFF)
 	inst.Light:SetColour(table.unpack(NORMAL_LIGHT_COLOUR))
 	inst.Light:Enable(false)
+
+	inst.reskin_tool_cannot_target_this = true
 
 	inst.entity:SetPristine()
 

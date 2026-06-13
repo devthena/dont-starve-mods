@@ -93,7 +93,7 @@ AddUserCommand("rename_chester", {
 	aliases = { "rc" },
 	prettyname = "Rename Chester",
 	desc = "Rename your own Chester with a custom name.",
-	permission = COMMAND_PERMISSION.USER,
+	permission = 0,
 	params = { "name", "n2", "n3", "n4", "n5" },
 	paramsoptional = { false, true, true, true, true },
 	slash = true,

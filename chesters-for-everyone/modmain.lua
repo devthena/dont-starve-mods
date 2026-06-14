@@ -7,13 +7,13 @@ local chester_rename = GetModConfigData("chester_rename")
 local function SpawnEyeBone(player)
 	local player_name = player:GetDisplayName()
 	local x, y, z = player.Transform:GetWorldPosition()
-	local pt = Vector3(x, y, z)
+	local pt = GLOBAL.Vector3(x, y, z)
 
 	local theta = math.random() * 2 * math.pi
-	local offset = FindWalkableOffset(pt, theta, 3, 8, true)
+	local offset = GLOBAL.FindWalkableOffset(pt, theta, 3, 8, true)
 	local spawn_pt = offset ~= nil and (pt + offset) or pt
 
-	local eyebone = SpawnPrefab("cfe_eyebone")
+	local eyebone = GLOBAL.SpawnPrefab("cfe_eyebone")
 
 	eyebone.PlayerID = player.userid
 	eyebone.PlayerName = player_name
@@ -23,26 +23,33 @@ local function SpawnEyeBone(player)
 	eyebone.components.named:SetName(player_name .. "'s Eye Bone")
 
 	eyebone.Transform:SetPosition(spawn_pt:Get())
+
+	local sx, sy, sz = spawn_pt:Get()
+	print("[Chesters for Everyone] Spawned Eye Bone for", player_name, "at", sx, sy, sz)
 end
 
-local function OnPlayerJoin(player)
-	if TheWorld:HasTag("cave") then
+local function OnPlayerJoin(world, player)
+	print("[Chesters for Everyone] Player joined:", player:GetDisplayName(), "| userid:", player.userid)
+
+	if world:HasTag("cave") then
+		print("[Chesters for Everyone] Skipping Eye Bone spawn — cave shard")
 		return
 	end
 
-	if TheSim:FindFirstEntityWithTag(player.userid .. "_eyebone") == nil then
+	if GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_eyebone") == nil then
 		SpawnEyeBone(player)
+	else
+		print("[Chesters for Everyone] Eye Bone already exists for", player:GetDisplayName())
 	end
 end
 
-AddSimPostInit(function()
-	if TheWorld ~= nil and TheWorld.ismastersim then
-		TheWorld:ListenForEvent("ms_playerjoined", function(_, player)
-			if player then
-				OnPlayerJoin(player)
-			end
-		end)
-	end
+AddPrefabPostInit("world", function(inst)
+	print("[Chesters for Everyone] Registering ms_playerjoined listener")
+	inst:ListenForEvent("ms_playerjoined", function(_, player)
+		if player then
+			OnPlayerJoin(inst, player)
+		end
+	end)
 end)
 
 local id_table = {
@@ -71,7 +78,7 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 		return
 	end
 
-	local chester = TheSim:FindFirstEntityWithTag(player.userid .. "_chester")
+	local chester = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_chester")
 
 	if not chester then
 		player.components.talker:Say(strings.system.companion_missing)

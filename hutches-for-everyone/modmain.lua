@@ -7,13 +7,13 @@ local hutch_rename = GetModConfigData("hutch_rename")
 local function SpawnFishBowl(player)
 	local player_name = player:GetDisplayName()
 	local x, y, z = player.Transform:GetWorldPosition()
-	local pt = Vector3(x, y, z)
+	local pt = GLOBAL.Vector3(x, y, z)
 
 	local theta = math.random() * 2 * math.pi
-	local offset = FindWalkableOffset(pt, theta, 3, 8, true)
+	local offset = GLOBAL.FindWalkableOffset(pt, theta, 3, 8, true)
 	local spawn_pt = offset ~= nil and (pt + offset) or pt
 
-	local fishbowl = SpawnPrefab("hfe_fishbowl")
+	local fishbowl = GLOBAL.SpawnPrefab("hfe_fishbowl")
 
 	fishbowl.PlayerID = player.userid
 	fishbowl.PlayerName = player_name
@@ -23,15 +23,23 @@ local function SpawnFishBowl(player)
 	fishbowl.components.named:SetName(player_name .. "'s Star-Sky")
 
 	fishbowl.Transform:SetPosition(spawn_pt:Get())
+
+	local sx, sy, sz = spawn_pt:Get()
+	print("[Hutches for Everyone] Spawned Fish Bowl for", player_name, "at", sx, sy, sz)
 end
 
-local function OnPlayerJoin(player)
-	if TheWorld == nil or not TheWorld:HasTag("cave") then
+local function OnPlayerJoin(world, player)
+	print("[Hutches for Everyone] Player joined:", player:GetDisplayName(), "| userid:", player.userid)
+
+	if not world:HasTag("cave") then
+		print("[Hutches for Everyone] Skipping Fish Bowl spawn — not cave shard")
 		return
 	end
 
-	if TheSim:FindFirstEntityWithTag(player.userid .. "_fishbowl") == nil then
+	if GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_fishbowl") == nil then
 		SpawnFishBowl(player)
+	else
+		print("[Hutches for Everyone] Fish Bowl already exists for", player:GetDisplayName())
 	end
 end
 
@@ -40,14 +48,13 @@ local id_table = {
 	id = "rename_hutch",
 }
 
-AddSimPostInit(function()
-	if TheWorld ~= nil and TheWorld.ismastersim and TheWorld:HasTag("cave") then
-		TheWorld:ListenForEvent("ms_playerjoined", function(_, player)
-			if player then
-				OnPlayerJoin(player)
-			end
-		end)
-	end
+AddPrefabPostInit("world", function(inst)
+	print("[Hutches for Everyone] Registering ms_playerjoined listener")
+	inst:ListenForEvent("ms_playerjoined", function(_, player)
+		if player then
+			OnPlayerJoin(inst, player)
+		end
+	end)
 end)
 
 AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
@@ -71,7 +78,7 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 		return
 	end
 
-	local hutch = TheSim:FindFirstEntityWithTag(player.userid .. "_hutch")
+	local hutch = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_hutch")
 
 	if not hutch then
 		player.components.talker:Say(strings.system.companion_missing)
@@ -93,7 +100,7 @@ AddUserCommand("rename_hutch", {
 	aliases = { "rh" },
 	prettyname = "Rename Hutch",
 	desc = "Rename your own Hutch with a custom name.",
-	permission = COMMAND_PERMISSION.USER,
+	permission = 0,
 	params = { "name", "n2", "n3", "n4", "n5" },
 	paramsoptional = { false, true, true, true, true },
 	slash = true,

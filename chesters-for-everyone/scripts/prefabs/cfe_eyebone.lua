@@ -162,11 +162,12 @@ local function RebindChester(inst, chester)
 	if chester ~= nil then
 		OpenEye(inst)
 
+		inst:ListenForEvent("death", function()
+			StartRespawn(inst, TUNING.CHESTER_RESPAWN_TIME)
+		end, chester)
+
 		if chester.components.follower.leader ~= inst then
 			chester.components.follower:SetLeader(inst)
-			inst:ListenForEvent("death", function()
-				StartRespawn(inst, TUNING.CHESTER_RESPAWN_TIME)
-			end, chester)
 		end
 
 		return true

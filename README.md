@@ -31,7 +31,7 @@ Both mods expose two options in the mod settings menu:
 
 ## Localization
 
-Both mods support localization. English strings are defined in `scripts/strings.lua` per mod. To add a new language, create a file at `scripts/locale/<lang>.lua` returning a table that overrides any keys from `strings.lua`.
+Both mods support localization. English strings are defined in `scripts/cfe_strings.lua` (CFE) / `scripts/hfe_strings.lua` (HFE). To add a new language, create a file at `scripts/locale/<lang>.lua` returning a table that overrides any keys from the mod's strings file.
 
 Currently supported languages: **English**, **Simplified Chinese** (`zh`)
 

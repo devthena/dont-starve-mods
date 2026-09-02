@@ -70,7 +70,7 @@ local strings = {
 	},
 }
 
-local lang = TheSim:GetGameLanguage()
+local lang = LOC.GetLocaleCode()
 local ok, locale = pcall(require, "locale/" .. lang)
 
 if ok then

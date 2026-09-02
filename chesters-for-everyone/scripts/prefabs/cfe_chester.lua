@@ -30,7 +30,7 @@ local prefabs = {
 }
 
 local brain = require("brains/chesterbrain")
-local strings = require("strings")
+local strings = require("cfe_strings")
 
 local ChesterStateNames = {
 	"NORMAL",

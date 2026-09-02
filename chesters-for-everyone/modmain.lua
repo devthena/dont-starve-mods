@@ -1,6 +1,6 @@
 PrefabFiles = { "cfe_eyebone", "cfe_chester" }
 
-local strings = require("strings")
+local strings = require("cfe_strings")
 
 local chester_rename = GetModConfigData("chester_rename")
 
@@ -28,6 +28,24 @@ local function SpawnEyeBone(player)
 	print("[Chesters for Everyone] Spawned Eye Bone for", player_name, "at", sx, sy, sz)
 end
 
+local function RelocateIfUnsafe(eyebone)
+	local x, y, z = eyebone.Transform:GetWorldPosition()
+
+	if GLOBAL.TheWorld.Map:IsPassableAtPoint(x, y, z) then
+		return
+	end
+
+	local pt = GLOBAL.Vector3(x, y, z)
+	local theta = math.random() * 2 * math.pi
+	local offset = GLOBAL.FindWalkableOffset(pt, theta, 3, 8, true)
+	local safe_pt = offset ~= nil and (pt + offset) or nil
+
+	if safe_pt ~= nil then
+		eyebone.Transform:SetPosition(safe_pt:Get())
+		print("[Chesters for Everyone] Relocated Eye Bone away from an unsafe location")
+	end
+end
+
 local function OnPlayerJoin(world, player)
 	print("[Chesters for Everyone] Player joined:", player:GetDisplayName(), "| userid:", player.userid)
 
@@ -36,9 +54,12 @@ local function OnPlayerJoin(world, player)
 		return
 	end
 
-	if GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_eyebone") == nil then
+	local eyebone = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_eyebone")
+
+	if eyebone == nil then
 		SpawnEyeBone(player)
 	else
+		RelocateIfUnsafe(eyebone)
 		print("[Chesters for Everyone] Eye Bone already exists for", player:GetDisplayName())
 	end
 end
@@ -93,7 +114,9 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	chester.Nickname = name
 
 	local template = strings.rename[player.prefab] or strings.rename.DEFAULT
-	player.components.talker:Say((template:gsub("{name}", name)))
+	player.components.talker:Say((template:gsub("{name}", function()
+		return name
+	end)))
 end)
 
 AddUserCommand("rename_chester", {

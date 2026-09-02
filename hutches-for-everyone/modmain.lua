@@ -1,6 +1,6 @@
 PrefabFiles = { "hfe_fishbowl", "hfe_hutch" }
 
-local strings = require("strings")
+local strings = require("hfe_strings")
 
 local hutch_rename = GetModConfigData("hutch_rename")
 
@@ -28,6 +28,24 @@ local function SpawnFishBowl(player)
 	print("[Hutches for Everyone] Spawned Fish Bowl for", player_name, "at", sx, sy, sz)
 end
 
+local function RelocateIfUnsafe(fishbowl)
+	local x, y, z = fishbowl.Transform:GetWorldPosition()
+
+	if GLOBAL.TheWorld.Map:IsPassableAtPoint(x, y, z) then
+		return
+	end
+
+	local pt = GLOBAL.Vector3(x, y, z)
+	local theta = math.random() * 2 * math.pi
+	local offset = GLOBAL.FindWalkableOffset(pt, theta, 3, 8, true)
+	local safe_pt = offset ~= nil and (pt + offset) or nil
+
+	if safe_pt ~= nil then
+		fishbowl.Transform:SetPosition(safe_pt:Get())
+		print("[Hutches for Everyone] Relocated Fish Bowl away from an unsafe location")
+	end
+end
+
 local function OnPlayerJoin(world, player)
 	print("[Hutches for Everyone] Player joined:", player:GetDisplayName(), "| userid:", player.userid)
 
@@ -36,9 +54,12 @@ local function OnPlayerJoin(world, player)
 		return
 	end
 
-	if GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_fishbowl") == nil then
+	local fishbowl = GLOBAL.TheSim:FindFirstEntityWithTag(player.userid .. "_fishbowl")
+
+	if fishbowl == nil then
 		SpawnFishBowl(player)
 	else
+		RelocateIfUnsafe(fishbowl)
 		print("[Hutches for Everyone] Fish Bowl already exists for", player:GetDisplayName())
 	end
 end
@@ -93,7 +114,9 @@ AddModRPCHandler(id_table.namespace, id_table.id, function(player, name)
 	hutch.Nickname = name
 
 	local template = strings.rename[player.prefab] or strings.rename.DEFAULT
-	player.components.talker:Say((template:gsub("{name}", name)))
+	player.components.talker:Say((template:gsub("{name}", function()
+		return name
+	end)))
 end)
 
 AddUserCommand("rename_hutch", {

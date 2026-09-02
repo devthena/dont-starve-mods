@@ -26,7 +26,7 @@ local prefabs = {
 }
 
 local brain = require("brains/chesterbrain")
-local strings = require("strings")
+local strings = require("hfe_strings")
 
 local sounds = {
 	sleep = "dontstarve/creatures/together/hutch/sleep",
